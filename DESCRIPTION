@@ -1,0 +1,17 @@
+Package: aaSimulator
+Type: Package
+Title: Simulate Axis and Allies Battles
+Version: 0.1.0
+Author: Edvin Fuglebakk
+Maintainer: Edvin Fuglebakk <Edvin.Fuglebakk@gmail.com>
+Description: package for simulating Axis and Allies battles and visualising the distribution of outcomes.
+    Contains generic engine for simulating battles and plotting results, for a set order of loss specification.
+    The engine is utilized by implementing a battle-function encoding the rule of the specific Axis and Allies game one wants to simulate.
+    An example implementation is provided for the Larry Harris Tournament Rules for Axis and Allies Revised (LHTR 2.0). Technological development units are not included.
+License: LGPL
+Encoding: UTF-8
+LazyData: true
+Import: data.table, ggplot2
+Suggests: 
+    testthat
+RoxygenNote: 6.1.1
