@@ -31,7 +31,8 @@ makeUnitList <- function(){
 
 #' Play one round of battle
 #' @param roundnr integer() number of the round of battle played, enumerating from 1.
-#' @param submerge logical() whether submarines should submerge if possible
+#' @param submergeAttack logical() whether attacking submarines should submerge if possible
+#' @param submergeDefend logical() whether defending submarines should submerge if possible
 #' @return list() with members
 #'  \item{attackerLoss}{integer() attacker IPC loss}
 #'  \item{defenderLoss}{integer() defender IPC loss}
@@ -40,11 +41,13 @@ makeUnitList <- function(){
 #'  \item{ret}{retreat directive encountered when resolving casualties}
 #' @noRd
 #' @keywords internal
-play_LHTR_battle_round <- function(unitsAttacker, unitsDefender, oolAttacker, oolDefender, roundnr, submerge=F){
+play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAttack=F, submergeDefend=F){
 
   if (all(c("Sea", "Land") %in% c(unitsAttacker$type, unitsDefender$type))){
     stop("Land and Sea units cannot be mixed in battle (except for offshore bombardment (BBomb) on land)")
   }
+
+  #check all OOLs
 
   if (roundnr == 1){
     # aa guns (roll and remove)
@@ -79,7 +82,6 @@ play_LHTR_battle_round <- function(unitsAttacker, unitsDefender, oolAttacker, oo
 #'  \item{+ret}{Attacker will retreat when all units preceeding this directive is lost.}
 #' @param oolAttacker character() order of loss for attacker
 #' @param oolDefender character() order of loss for defender
-#' @param submerge logical() whether submarines should submerge if possible
 #' @param retreat integer() round number after which attacker should retreat, if NULL, round number will not trigger retreat
 #' @return list() with members
 #'  \item{attackerLoss}{integer() attacker IPC loss}
@@ -87,7 +89,27 @@ play_LHTR_battle_round <- function(unitsAttacker, unitsDefender, oolAttacker, oo
 #'  \item{unitsAttacker}{data.table with units for the attacker after round}
 #'  \item{unitsDefender}{data.table with units for the defender after round}
 #' @export
-play_LHTR_battle <- function(oolAttacker, oolDefender, submerge=F, retreat=NULL){
+play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL){
 
+  legalcodes <- c(lhtr2_units$shortcut, "RET", "SUBM")
+  if (!all(oolAttacker %in% legalcodes)){
+    illegalCodes <- oolAttacker[!(oolAttacker %in% legalcodes)]
+    stop(paste("Syntax error:", illegalCodes))
+  }
+  if (!all(oolDefender %in% legalcodes)){
+    illegalCodes <- oolDefender[!(oolDefender %in% legalcodes)]
+    stop(paste("Syntax error:", illegalCodes))
+  }
+  if (sum(oolAttacker=="bb")!=sum(oolAttacker=="BBx")){
+    stop("BB (Battleship) and BBx (Battleship extra hit) is not included the same number of times.")
+  }
+  if (sum(oolDefender=="bb")!=sum(oolDefender=="BBx")){
+    stop("BB (Battleship) and BBx (Battleship extra hit) is not included the same number of times.")
+  }
+
+  # check that RET is not included in illegal combination with Bbomb
+
+  submergeAttack <- "SUBM" %in% oolAttacker
+  submergeDefend <- "SUBM" %in% oolDefender
 }
 
