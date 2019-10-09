@@ -30,14 +30,16 @@ makeUnitList <- function(){
 }
 
 #' Play one round of battle
+#' @param oolAttacker
+#' @param oolDefender
 #' @param roundnr integer() number of the round of battle played, enumerating from 1.
 #' @param submergeAttack logical() whether attacking submarines should submerge if possible
 #' @param submergeDefend logical() whether defending submarines should submerge if possible
 #' @return list() with members
 #'  \item{attackerLoss}{integer() attacker IPC loss}
 #'  \item{defenderLoss}{integer() defender IPC loss}
-#'  \item{unitsAttacker}{data.table with units for the attacker after round}
-#'  \item{unitsDefender}{data.table with units for the defender after round}
+#'  \item{unitsAttacker}{character() vector with units for the attacker after round}
+#'  \item{unitsDefender}{character() vector with units for the defender after round}
 #'  \item{ret}{retreat directive encountered when resolving casualties}
 #' @noRd
 #' @keywords internal
@@ -111,5 +113,32 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL){
 
   submergeAttack <- "SUBM" %in% oolAttacker
   submergeDefend <- "SUBM" %in% oolDefender
+
+  round <- 1
+  lastresult <- play_LHTR_battle_round(oolAttacker, oolDefender, round, submergeAttack, submergeDefend)
+  result <- lastresult
+  while (T){
+    if (!is.null(retreat) & round>=retreat){
+      return(result)
+    }
+    if (result$ret){
+      return(result)
+    }
+    if (length(result$unitsAttacker)==0){
+      return(result)
+    }
+    if (length(result$unitsDefender)==0){
+      return(result)
+    }
+
+    round <- round +1
+    lastresult <- play_LHTR_battle_round(oolAttacker, oolDefender, round, submergeAttack, submergeDefend)
+
+    result$attackerLoss <- result$attackerLoss + lastresult$attackerLoss
+    result$defenderLoss <- result$defenderLoss + lastresult$defenderLoss
+    result$unitsAttacker <- lastresult$unitsAttacker
+    result$unitsDefender <- lastresult$unitsDefender
+
+  }
 }
 

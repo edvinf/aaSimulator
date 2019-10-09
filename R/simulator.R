@@ -40,16 +40,26 @@ simulateBattles <- function(oolAttacker, oolDdefender, FUN=play_LHTR_battle, ...
   if ("RET" %in% oolDefender){
     stop("Flag RET is not allowed in defender OOL.")
   }
-
+  if (sum(oolAttacker=="RET")>1){
+    stop("Include RET only once in attacker OOL.")
+  }
   if (sum(oolDefender=="SUBM")>1){
     stop("Include SUBM only once in each OOL.")
   }
   if (sum(oolAttacker=="SUBM")>1){
     stop("Include SUBM only once in each OOL.")
   }
-  if (sum(oolAttacker=="RET")>1){
-    stop("Include RET only once in each OOL.")
-  }
 
+  results <- list()
+  for (i in 1:replications){
+    results[[i]] <- list()
+    results[[i]]$IPCloss <- data.table(IPClossAttacker=character(iterations), IPClossDefender=character(iterations))
+    stop("Figure out how to build data frame correctly")
+    results[[i]]$unitsLeftAttacker <- data.table(matrix(ncol=length(oolAttacker), nrow=iterations))
+    results[[i]]$unitsLeftDefender <- data.table(matrix(ncol=length(oolDefender), nrow=iterations))
+    for (j in 1:iterations){
+
+    }
+  }
 
 }
