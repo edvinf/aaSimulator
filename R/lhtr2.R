@@ -34,9 +34,12 @@ makeUnitList <- function(){
   return(unitTable)
 }
 
-#' Play one round of battle
-#' @param oolAttacker
-#' @param oolDefender
+#' Play round
+#' @description Play one round of battle follwing Larry Harris Tournament Rules (LHTR 2.0) for Axis and Allies Revised edition.
+#' @details
+#'  units for oolAttacker and oolDefender accepts all units specified in \code{link[aaSimulator]{simulateBattles}}
+#' @param oolAttacker character() vector of units for the attacker order by loss preference
+#' @param oolDefender character() vector of units for the defender order by loss preference
 #' @param roundnr integer() number of the round of battle played, enumerating from 1.
 #' @param submergeAttack logical() whether attacking submarines should submerge if possible
 #' @param submergeDefend logical() whether defending submarines should submerge if possible

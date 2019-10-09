@@ -1,6 +1,6 @@
 
-#' Simulate Axis and Allies Battle
-#' @description
+#' Simulate Battles
+#' @description Simulate Axis and Allies Battles
 #' @details
 #'  oolAttacker and oolDefender list all units in order of preferred loss.
 #'  In addition to regular units, some virtual units are added for signaling special abilities of units or battle choices.
@@ -26,14 +26,14 @@
 #'   \item{SUBM}{Flags submarines should submerge when possible.}
 #'   \item{RET}{Flags that attacker should retreat at first opportunity when all units preceeding this virtual unit are lost.}
 #'}
-#' @parameter oolAttacker character() vector of unit codes in preferred order of loss
-#' @parameter oolDefender character() vector of unit codes in preferred order of loss
-#' @parameter FUN function for running one battle
-#' @paramter ... additional arguments passed to FUN
-#' @parameter iterations
-#' @parameter replications
+#' @param oolAttacker character() vector of unit codes in preferred order of loss
+#' @param oolDefender character() vector of unit codes in preferred order of loss
+#' @param FUN function for running one battle
+#' @param ... additional arguments passed to FUN
+#' @param iterations number of iterations to simulate for each replication
+#' @param replications number of replications to run
 #' @return list with one member for each replication. Each replicate contains the members:
-#' \desctibe{
+#' \describe{
 #'  \item{IPClossAttacker}{numeric() with IPC loss for attacker for each simulated battle}
 #'  \item{IPClossDefender}{numeric() with IPC loss for defender for each simulated battle}
 #'  \item{unitsLeftAttacker}{data.table() with units left after each simulated battle for attacker}
