@@ -80,31 +80,55 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
 
 #' Roll dice
 #' @description Rolls a set of six-sided dice, and determine number of hits.
-#' @param ones number of dice that should return a hit for a roll of 1
-#' @param twos number of dice that should return a hit for a roll of 2 or less
-#' @param threes number of dice that should return a hit for a roll of 3 or less
-#' @param fours number of dice that should return a hit for a roll of 4 or less
-#' @param fives number of dice that should return a hit for a roll of 5 or less
+#' @param n number of dice to roll
+#' @param hitvalue largest value to count as a hit
 #' @return numeric() number of hits
 #' @export
-roll <- function(ones=0, twos=0, threes=0, fours=0, fives=0){
+roll <- function(n, hitvalue){
 
-  hits <- 0
-  if (ones > 0){
-    hits <- hits + sum(sample.int(6, ones, replace = T)==1)
-  }
-  if (twos > 0){
-    hits <- hits + sum(sample.int(6, twos, replace = T)<=2)
-  }
-  if (threes > 0){
-    hits <- hits + sum(sample.int(6, threes, replace = T)<=3)
-  }
-  if (fours > 0){
-    hits <- hits + sum(sample.int(6, fours, replace = T)<=4)
-  }
-  if (fives > 0){
-    hits <- hits + sum(sample.int(6, fives, replace = T)<=5)
-  }
+  hits <- sum(sample.int(6, n, replace = T) <= hitvalue)
 
   return(hits)
+}
+
+#' Determines which units should be popped (removed) units of ool
+#' @param n number of units to pop
+#' @param type if not null, first n units of given type is removed in stead
+#' @param targets list of valid targets for hits
+#' @return logical() vector with TRUE for units to keep
+#' @noRd
+#' @keywords internal
+pop <- function(ool, n=1, type=NULL, targets=c()){
+
+  if (n == 0){
+    return(rep(T, length(ool)))
+  }
+
+  if (is.null(type)){
+    if (n >= length(ool[ool %in% targets])){
+      return(ool %in% targets)
+    }
+
+    keep <- rep(T, length(ool))
+    assigned <- 0
+    for (i in 1:length(keep)){
+      if (ool[i] %in% targets & assigned < n){
+        keep[i] <- F
+        assigned <- assigned + 1
+      }
+    }
+    return(keep)
+  }
+
+  if (!(type %in% targets)){
+    stop("Error: Removing type not in targets")
+  }
+
+  if (type %in% ool){
+    lostindex <- which(ool==type)
+    lostindex <- lostindex[1:max(n,length(lostindex))]
+    keptindex <- 1:length(ool)
+    return(keptindex[!(keptindex %in% lostindex)])
+  }
+
 }
