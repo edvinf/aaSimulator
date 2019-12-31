@@ -183,7 +183,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
       remove_casualties(bbombhit, "defender")
 
       if (verbose & bbombhit > 0){
-        write(paste("Hit:,", bbombhit, ". Casualties removed."), stdout())
+        write(paste("Hit: ", bbombhit, ". Casualties removed.", sep=""), stdout())
       }
     }
 
@@ -258,6 +258,12 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   return(result)
 }
 
+#' @noRd
+calculateCost <- function(ool, remaining){
+  totalvalue <- sum(lhtr2_units[match(ool, lhtr2_units$shortcut),"cost"])
+  restvalue <- sum(lhtr2_units[match(remaining, lhtr2_units$shortcut),"cost"])
+  return(totalvalue - restvalue)
+}
 
 #' Play one battle
 #' @description Plays one battle following Larry Harris Tournament Ruls for Axis and Allies Revised edition (LHTR 2.0)
@@ -362,14 +368,14 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
 
       round <- round +1
       result <- play_LHTR_battle_round(result$unitsAttacker, result$unitsDefender, round, submergeAttack, submergeDefend, verbose = verbose)
-      result$lastround <- round
+      result$rounds <- round
     }
 
   }
 
   if (verbose){
     write(paste("------"), stdout())
-    write(paste("Remaining after round:", result$lastround), stdout())
+    write(paste("Remaining after round:", result$rounds), stdout())
     write(paste("Attacker: ", paste(result$unitsAttacker, collapse = ",")), stdout())
     write(paste("Defender: ", paste(result$unitsDefender, collapse=",")), stdout())
     write(paste("------"), stdout())
@@ -377,6 +383,8 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
 
   result$defenderLoss <- NULL
   result$attackerLoss <- NULL
+  result$attackerCost <- calculateCost(oolAttacker, result$unitsAttacker)
+  result$defenderCost <- calculateCost(oolDefender, result$unitsDefender)
   result$ret <- NULL
   return(result)
 }

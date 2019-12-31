@@ -23,25 +23,40 @@
 #'\describe{
 #'   \item{BBomb}{Battleship used for offshore bombardment}
 #'   \item{BBx}{The first hit of a battleship for rulesets with two-hit capabilities. Modelled as a virtual unit with 0 in attack and defense.}
-#'   \item{SUBM}{Flags submarines should submerge when possible.}
+#'   \item{SUBM}{Flags that submarines should submerge when possible, after all units preceeding this virtual unit are lost.}
 #'   \item{RET}{Flags that attacker should retreat at first opportunity when all units preceeding this virtual unit are lost.}
 #'}
+#'
+#' FUN must accept the arguments oolAttacker and oolDefender and return a list with five members:
+#' \describe{
+#'  \item{unitsAttacker}{the remaining units for attacker}
+#'  \item{unitsDefender}{the remaining units for defender}
+#'  \item{rounds}{the number of rounds in the battler}
+#'  \item{attackerCost}{The cost of units lost for attacker}
+#'  \item{defenderCost}{The cost of units lost for defender}
+#' }
+#'
 #' @param oolAttacker character() vector of unit codes in preferred order of loss
 #' @param oolDefender character() vector of unit codes in preferred order of loss
 #' @param FUN function for running one battle
 #' @param ... additional arguments passed to FUN
 #' @param iterations number of iterations to simulate for each replication
 #' @param replications number of replications to run
-#' @return list with one member for each replication. Each replicate contains the members:
+#' @return list with members:
 #' \describe{
-#'  \item{IPClossAttacker}{numeric() with IPC loss for attacker for each simulated battle}
-#'  \item{IPClossDefender}{numeric() with IPC loss for defender for each simulated battle}
-#'  \item{unitsLeftAttacker}{data.table() with units left after each simulated battle for attacker}
-#'  \item{unitsLeftDefender}{data.table() with units left after each simulated battle for defender}
+#'  \item{attackerStart}{units for attacker at start of battle, formatted as oolAttacker}
+#'  \item{defenderStart}{units for defender at start of battle, formatted as oolDefender}
+#'  \item{replicates}{list with member for each replicate, each a list with results from FUN for each iteration}
 #' }
 #' @export
 simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ..., iterations=2000, replications=3){
 
+  if (replications < 1){
+    stop("Must run at least one replicate.")
+  }
+  if (iterations < 1){
+    stop("Must run at least one iteratation.")
+  }
   if ("RET" %in% oolDefender){
     stop("Flag RET is not allowed in defender OOL.")
   }
@@ -56,23 +71,23 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
   }
 
   results <- list()
+  results$attackerStart <- oolAttacker
+  results$defenderStart <- oolDefender
+  results$replicates <- list()
+
   for (i in 1:replications){
 
     firstresult <- FUN(oolAttacker, oolDefender, ...)
 
-    results[[i]] <- list()
-    results[[i]]$IPClossAttacker <- c(firstresult$attackerLoss)
-    results[[i]]$IPClossDefender <- c(firstresult$defenderLoss)
-    results[[i]]$unitsLeftAttacker <- firstresult$unitsAttacker
-    results[[i]]$unitsLeftDefender <- firstresult$unitsDefender
+    outcome <- list()
+    outcome[[1]] <- firstresult
 
     for (j in 2:iterations){
       lastresult <- FUN(oolAttacker, oolDefender, ...)
-      results[[i]]$IPClossAttacker <- c(results[[i]]$IPClossAttacker, lastresult$attackerLoss)
-      results[[i]]$IPClossDefender <- c(results[[i]]$IPClossDefender, lastresult$defenderLoss)
-      results[[i]]$unitsLeftAttacker <- rbind(results[[i]]$unitsLeftAttacker, lastresult$unitsAttacker)
-      results[[i]]$unitsLeftDefender <- rbind(results[[i]]$unitsLeftDefender, lastresult$unitsDefender)
+      outcome[[j]] <- lastresult
     }
+
+    results$replicates[[i]] <- outcome
   }
 
   return(results)

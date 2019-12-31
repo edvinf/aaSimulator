@@ -1,4 +1,20 @@
 s<-play_LHTR_battle(c("inf"), c("inf"))
 expect_false(is.null(s$unitsAttacker))
 expect_false(is.null(s$unitsDefender))
-expect_gte(s$lastround, 1)
+expect_gte(s$rounds, 1)
+
+s<-play_LHTR_battle(c("inf"), c("inf", "aa"))
+expect_false(is.null(s$unitsAttacker))
+expect_false(is.null(s$unitsDefender))
+expect_gte(s$rounds, 1)
+expect_gte(s$attackerCost, 0)
+expect_gte(s$defenderCost, 0)
+expect_gte(s$defenderCost + s$attackerCost, 2)
+
+s<-play_LHTR_battle(c("BBomb", "inf"), c("inf", "aa"))
+expect_false(is.null(s$unitsAttacker))
+expect_false(is.null(s$unitsDefender))
+expect_gte(s$rounds, 1)
+
+expect_error(play_LHTR_battle(c("BBomb", "inf"), c("BBomb", "inf", "aa")))
+expect_error(play_LHTR_battle(c("bbomb", "inf"), c("inf", "aa")))
