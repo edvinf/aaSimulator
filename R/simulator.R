@@ -113,8 +113,8 @@ roll <- function(n, hitvalue){
 #' @noRd
 #' @keywords internal
 #' Removes first 'hits' units from ool
-#' Only hits in removables considered towards hit count
-#' if type is given only hits of type is considered
+#' Only hits in removables considered towards hit count,
+#' but other hits are also removed (control directives such as RET and SUBM etc.)
 #' @noRd
 pop <- function(ool, hits, removeables){
 

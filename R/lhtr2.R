@@ -137,25 +137,31 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 
       if ("RET" %in% result$attackerLoss){
         result$ret <<- T
-        mask <- pop(result$unitsAttacker, 1, removeables = targetunits)
-        result$attackerLoss <<- c(result$attackerLoss, result$unitsAttacker[!mask])
-        result$unitsAttacker <<- result$unitsAttacker[mask]
+      }
+      if ("SUBM" %in% result$attackerLoss){
+        stop("SUBM not implemented")
       }
     }
     else if (side == "defender"){
       mask <- pop(result$unitsDefender, hits, removeables = targetunits)
       result$defenderLoss <<- c(result$defenderLoss, result$unitsDefender[!mask])
       result$unitsDefender <<- result$unitsDefender[mask]
+
+      if ("SUBM" %in% result$defenderLoss){
+        stop("SUBM not implemented")
+      }
+
     }
     else{
       stop()
     }
   }
 
-  if (roundnr == 1){
+  #
+  # opening fire
+  #
 
-    bbs <- sum(oolAttacker == "BBomb")
-    oolAttacker <- oolAttacker[oolAttacker != "BBomb"]
+  if (roundnr == 1){
 
     if ("aa" %in% oolDefender){
 
@@ -193,6 +199,8 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     #
     # Offshore bombardment
     #
+    bbs <- sum(oolAttacker == "BBomb")
+    oolAttacker <- oolAttacker[oolAttacker != "BBomb"]
 
     if (bbs > 0){
 
@@ -244,6 +252,10 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   }
 
 
+  #
+  # / opening fire
+  #
+
   if (verbose){
     write("Roll battle dice.", stdout())
   }
@@ -267,12 +279,16 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   remove_casualties(subattackhits, "defender", targetunits = lhtr2_units[lhtr2_units$type == "Sea"])
   remove_casualties(subdefendhits, "attacker", targetunits = lhtr2_units[lhtr2_units$type == "Sea"])
 
-  # subs, submerge (replace with submerged sub, do not add to IPC loss)
+  # subs, submerge after casualties are resolved, if possible (replace with submerged sub, do not add to IPC loss)
   if (submergeAttack){
-    oolAttacker[oolAttacker == "sub"] <- "subm"
+    if (!any("dd" %in% result$unitsDefender)){
+      oolAttacker[oolAttacker == "sub"] <- "subm"
+    }
   }
   if (submergeDefend){
-    oolDefender[oolDefender == "sub"] <- "subm"
+    if (!any("dd" %in% result$unitsAttacker)){
+      oolDefender[oolDefender == "sub"] <- "subm"
+    }
   }
 
   return(result)
