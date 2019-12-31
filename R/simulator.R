@@ -93,42 +93,35 @@ roll <- function(n, hitvalue){
 
 #' Determines which units should be popped (removed) units of ool
 #' @param n number of units to pop
-#' @param type if not null, first n units of given type is removed in stead
-#' @param targets list of valid targets for hits
+#' @param removeables list of valid targets for hits
 #' @return logical() vector with TRUE for units to keep
 #' @noRd
 #' @keywords internal
-pop <- function(ool, n=1, type=NULL, targets=c()){
+#' Removes first 'hits' units from ool
+#' Only hits in removables considered towards hit count
+#' if type is given only hits of type is considered
+#' @noRd
+pop <- function(ool, hits, removeables){
 
-  if (n == 0){
-    return(rep(T, length(ool)))
+  if (length(ool) == 0){
+    return(logical())
   }
 
-  if (is.null(type)){
-    if (n >= length(ool[ool %in% targets])){
-      return(ool %in% targets)
-    }
-
-    keep <- rep(T, length(ool))
-    assigned <- 0
-    for (i in 1:length(keep)){
-      if (ool[i] %in% targets & assigned < n){
-        keep[i] <- F
+  mask <- logical()
+  assigned <- 0
+  for (i in 1:length(ool)){
+    if (assigned < hits){
+      if (ool[i] %in% removeables){
+        mask <- c(mask, F)
         assigned <- assigned + 1
       }
+      else{
+        mask <- c(mask, F)
+      }
     }
-    return(keep)
+    else{
+      mask <- c(mask, T)
+    }
   }
-
-  if (!(type %in% targets)){
-    stop("Error: Removing type not in targets")
-  }
-
-  if (type %in% ool){
-    lostindex <- which(ool==type)
-    lostindex <- lostindex[1:max(n,length(lostindex))]
-    keptindex <- 1:length(ool)
-    return(keptindex[!(keptindex %in% lostindex)])
-  }
-
+  return(mask)
 }

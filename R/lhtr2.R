@@ -79,34 +79,7 @@ defend <- function(units){
   return(hits)
 }
 
-#' Removes first 'hits' units from ool
-#' Only hits in removables considered
-#' if type is given only hits of type is considered
-#' @noRd
-pop <- function(ool, hits, removables){
 
-    if (length(ool) == 0){
-      return(logical())
-    }
-
-    mask <- logical()
-    assigned <- 0
-    for (i in 1:length(ool)){
-      if (assigned < hits){
-        if (ool[i] %in% removables){
-          mask <- c(mask, F)
-          assigned <- assigned + 1
-        }
-        else{
-          mask <- c(mask, F)
-        }
-      }
-      else{
-        mask <- c(mask, T)
-      }
-    }
-    return(mask)
-}
 
 #' Play round
 #' @description Play one round of battle follwing Larry Harris Tournament Rules (LHTR 2.0) for Axis and Allies Revised edition.
@@ -135,21 +108,21 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   result$unitsDefender <- oolDefender
 
   remove_casualties <- function(hits, side, targetunits=lhtr2_units[!is.na(lhtr2_units$baseAttack),][["shortcut"]]){
-    # move to pop ?
+
     if (side == "attacker"){
-      mask <- pop(result$unitsAttacker, hits, removables = targetunits)
+      mask <- pop(result$unitsAttacker, hits, removeables = targetunits)
       result$attackerLoss <<- c(result$attackerLoss, result$unitsAttacker[!mask])
       result$unitsAttacker <<- result$unitsAttacker[mask]
 
       if ("RET" %in% result$attackerLoss){
         result$ret <<- T
-        mask <- pop(result$unitsAttacker, 1, removables = targetunits)
+        mask <- pop(result$unitsAttacker, 1, removeables = targetunits)
         result$attackerLoss <<- c(result$attackerLoss, result$unitsAttacker[!mask])
         result$unitsAttacker <<- result$unitsAttacker[mask]
       }
     }
     else if (side == "defender"){
-      mask <- pop(result$unitsDefender, hits, removables = targetunits)
+      mask <- pop(result$unitsDefender, hits, removeables = targetunits)
       result$defenderLoss <<- c(result$defenderLoss, result$unitsDefender[!mask])
       result$unitsDefender <<- result$unitsDefender[mask]
     }
