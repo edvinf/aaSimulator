@@ -59,10 +59,26 @@ getCostLHTR <- function(units){
 #' @keywords internal
 attack <- function(units){
   hits <- 0
-  for (u in units){
-    if (!is.na(lhtr2_units[lhtr2_units$shortcut == u,][["baseAttack"]])){
-      hits <- hits + roll(1, lhtr2_units[lhtr2_units$shortcut == u,][["baseAttack"]])
-    }
+
+  inf <- units[units == "inf"]
+  rest <- units[units != "inf"]
+  nart <- sum(rest == "art")
+
+  twos <- min(length(inf), nart)
+  ones <- length(inf) - twos
+
+  hits <- hits + roll(ones, 1)
+  hits <- hits + roll(twos, 2)
+
+  attacks <- lhtr2_units[match(rest, lhtr2_units$shortcut),"baseAttack"]
+
+  if (length(attacks) == 0){
+    return(hits)
+  }
+
+  attacks <- attacks[!is.na(attacks)]
+  for (i in 1:6){
+    hits <- hits + roll(sum(attacks==i), i)
   }
   return(hits)
 }
@@ -71,10 +87,15 @@ attack <- function(units){
 #' @keywords internal
 defend <- function(units){
   hits <- 0
-  for (u in units){
-    if (!is.na(lhtr2_units[lhtr2_units$shortcut == u,][["baseDefence"]])){
-      hits <- hits + roll(1, lhtr2_units[lhtr2_units$shortcut == u,][["baseDefence"]])
-    }
+  defences <- lhtr2_units[match(units, lhtr2_units$shortcut),"baseDefence"]
+
+  if (length(defences) == 0){
+    return(0)
+  }
+
+  defences <- defences[!is.na(defences)]
+  for (i in 1:6){
+    hits <- hits + roll(sum(defences==i), i)
   }
   return(hits)
 }
@@ -227,8 +248,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     write("Roll battle dice.", stdout())
   }
 
-  #roll rest attacker
-  # artillery (upgrade inf)
+  #roll rest attacker (art dep inf upgrade in attack())
   attackhits <- attack(oolAttacker[oolAttacker != "sub"])
 
   #roll rest defender
