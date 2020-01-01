@@ -131,7 +131,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   remove_casualties <- function(hits, side, targetunits=lhtr2_units[!is.na(lhtr2_units$baseAttack),][["shortcut"]]){
 
     if (side == "attacker"){
-      mask <- pop(result$unitsAttacker, hits, removeables = targetunits)
+      mask <- pop(result$unitsAttacker, hits, removeables = targetunits, skip=c("SUBM", "RET"))
       result$attackerLoss <<- c(result$attackerLoss, result$unitsAttacker[!mask])
       result$unitsAttacker <<- result$unitsAttacker[mask]
 
@@ -143,7 +143,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
       }
     }
     else if (side == "defender"){
-      mask <- pop(result$unitsDefender, hits, removeables = targetunits)
+      mask <- pop(result$unitsDefender, hits, removeables = targetunits, skip=c("SUBM", "RET"))
       result$defenderLoss <<- c(result$defenderLoss, result$unitsDefender[!mask])
       result$unitsDefender <<- result$unitsDefender[mask]
 

@@ -107,16 +107,19 @@ roll <- function(n, hitvalue){
 }
 
 #' Determines which units should be popped (removed) units of ool
-#' @param n number of units to pop
+#' @param ool list of units ordered by preffered order of loss
+#' @param hits number of units to pop
 #' @param removeables list of valid targets for hits
+#' @param skip list of units to remove if encountered before other units that are to be removed.
 #' @return logical() vector with TRUE for units to keep
 #' @noRd
 #' @keywords internal
 #' Removes first 'hits' units from ool
-#' Only hits in removables considered towards hit count,
+#' Only hits in removables are considered towards hit count,
+#' while both hits in removables and skip are removed
 #' but other hits are also removed (control directives such as RET and SUBM etc.)
 #' @noRd
-pop <- function(ool, hits, removeables){
+pop <- function(ool, hits, removeables, skip=c()){
 
   if (length(ool) == 0){
     return(logical())
@@ -130,8 +133,11 @@ pop <- function(ool, hits, removeables){
         mask <- c(mask, F)
         assigned <- assigned + 1
       }
-      else{
+      else if (ool[i] %in% skip) {
         mask <- c(mask, F)
+      }
+      else{
+        mask <- c(mask, T)
       }
     }
     else{
