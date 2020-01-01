@@ -1,10 +1,39 @@
 
-#' Simulate Battles
-#' @description Simulate Axis and Allies Battles
-#' @details
-#'  oolAttacker and oolDefender list all units in order of preferred loss.
-#'  In addition to regular units, some virtual units are added for signaling special abilities of units or battle choices.
-#'  The exact list of units depends on the function provided (FUN), but the following codes are reserved, and their use is encouraged when applicable:
+#' Results from a battle
+#'
+#' a list with members
+#' \describe{
+#'  \item{unitsAttacker}{character() vector with the remaining units for attacker}
+#'  \item{unitsDefender}{character() vector with the remaining units for defender}
+#'  \item{rounds}{integer() the number of rounds in the battler}
+#'  \item{attackerCost}{numeric() The cost of units lost for attacker}
+#'  \item{defenderCost}{numeric() The cost of units lost for defender}
+#' }
+#'
+#' @name battleResults
+#'
+NULL
+
+
+#' Result from battle simulation
+#'
+#' For a simuation of n iterations, replicated m times this is:
+#' list with members:
+#' \describe{
+#'  \item{attackerStart}{units for attacker at start of battle, formatted as oolAttacker}
+#'  \item{defenderStart}{units for defender at start of battle, formatted as oolDefender}
+#'  \item{replicates}{list of length m, with member for each replicate, each a list of length n containing \code{\link[aaSimulator]{battleResults}}
+#' }
+#'
+#' @name simulationResults
+#'
+NULL
+
+#' OOL order of loss specification
+#' A character vector specifying the units participating in a battle, ordered by their priority (first units lost first).
+#' May also contain virtual units, that may be special abilities or control directives to the battle simulator.
+#'
+#' Exact notation is determined by the battle function used. But for purposes of harmonization, the following notation is encouraged from common units:
 #'
 #'\describe{
 #'   \item{inf}{Infantry}
@@ -19,35 +48,31 @@
 #'   \item{bb}{Battleship}
 #'   \item{aa}{Anti-aircraft Gun. Most rule sets will allow only one per battle.}
 #'}
+#'
 #'  Some common virtual units:
 #'\describe{
-#'   \item{BBomb}{Battleship used for offshore bombardment}
+#'   \item{BBomb}{Offshore bombardment from Battleship, supporting amphibious assults.}
 #'   \item{BBx}{The first hit of a battleship for rulesets with two-hit capabilities. Modelled as a virtual unit with 0 in attack and defense.}
-#'   \item{SUBM}{Flags that submarines should submerge when possible, after all units preceeding this virtual unit are lost.}
+#'   \item{SUBM}{Flags that all attacking submarines should submerge when possible, after all units preceeding this virtual unit are lost.}
 #'   \item{RET}{Flags that attacker should retreat at first opportunity when all units preceeding this virtual unit are lost.}
 #'}
+#' @name ool
 #'
-#' FUN must accept the arguments oolAttacker and oolDefender and return a list with five members:
-#' \describe{
-#'  \item{unitsAttacker}{the remaining units for attacker}
-#'  \item{unitsDefender}{the remaining units for defender}
-#'  \item{rounds}{the number of rounds in the battler}
-#'  \item{attackerCost}{The cost of units lost for attacker}
-#'  \item{defenderCost}{The cost of units lost for defender}
-#' }
+NULL
+
+#' Simulate Battles
+#' @description Simulate Axis and Allies Battles
+#' @details
+#' The battle function 'FUN' implements the ruleset used.
+#' FUN must accept the arguments 'oolAttacker' and 'oolDefender' and return \code{\link[aaSimulator]{battleResults}}
 #'
-#' @param oolAttacker character() vector of unit codes in preferred order of loss
-#' @param oolDefender character() vector of unit codes in preferred order of loss
+#' @param oolAttacker character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}}
+#' @param oolDefender character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}}
 #' @param FUN function for running one battle
 #' @param ... additional arguments passed to FUN
 #' @param iterations number of iterations to simulate for each replication
-#' @param replications number of replications to run
-#' @return list with members:
-#' \describe{
-#'  \item{attackerStart}{units for attacker at start of battle, formatted as oolAttacker}
-#'  \item{defenderStart}{units for defender at start of battle, formatted as oolDefender}
-#'  \item{replicates}{list with member for each replicate, each a list with results from FUN for each iteration}
-#' }
+#' @param replications number of replicates to run
+#' @return \code{\link[aaSimulator]{simulationResults}}
 #' @export
 simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ..., iterations=2000, replications=3){
 
@@ -91,6 +116,81 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
   }
 
   return(results)
+}
+
+
+#' Battle statistics for simulation
+#'
+#' list with the following members:
+#' \describe{
+#'  \item{attackerStart}{units for attacker at start of battle, formatted as oolAttacker}
+#'  \item{defenderStart}{units for defender at start of battle, formatted as oolDefender}
+#'  \item{avereages}{stats averaged over replicates}
+#'  \item{replicates}{list with stats for all replicates of simulation}
+#' }
+#'
+#' Both 'averages' and the 'replicates' contain the stats:
+#' \describe{
+#'  \item{attackerWon}{proportion of battles won by attacker (all defending units lost), averaged over replicates}
+#'  \item{defendeWon}{proportion of battles won by defender (not all defending units lost), averaged over replicates}
+#'  \item{draw}{proportion of battles drawed (all units lost), averaged over replicates}
+#'  \item{meanRounds}{mean number of rounds before battle was concluded}
+#'  \item{meanAttackerCost}{mean cost of battle for attacker, averaged over iterations and replicates}
+#'  \item{meanDefenderCost}{mean cost of battle for defender, averaged over iterations and replicates}
+#' }
+#'
+#' @name simulationStats
+#'
+NULL
+
+#' Calculate battle statistics
+#' @description Calculates battle statistics for simulation
+#' @param simulationResults, formatted as: \code{\link[aaSimulator]{simulationResults}}
+#' @return \code{\link[aaSimulator]{simulationStats}}
+calculateStats <- function(simulationResults){
+
+  # function for applying to each replicate
+
+  meanValue <- function(repl, slot){
+    return(mean(unlist(lapply(repl, FUN = function(x){x[[slot]]}))))
+  }
+
+  winProportion <- function(repl){
+    return(sum(unlist(lapply(repl, FUN = function(x){length(x[["unitsAttacker"]]) > 0 & length(x[["unitsDefender"]]) == 0}))) / length(repl))
+  }
+
+  looseProportion <- function(repl){
+    return(sum(unlist(lapply(repl, FUN = function(x){length(x[["unitsDefender"]]) > 0}))) / length(repl))
+  }
+
+  drawProportion <- function(repl){
+    return(sum(unlist(lapply(repl, FUN = function(x){length(x[["unitsAttacker"]]) == 0 & length(x[["unitsDefender"]]) == 0}))) / length(repl))
+  }
+
+  stats <- list()
+  stats$attackerStart <- simulationResults$attackerStart
+  stats$defenderStart <- simulationResults$defenderStart
+  stats$replicates <- list()
+  stats$averages <- list()
+  stats$averages$attackerWon <- mean(unlist(lapply(simulationResults$replicates, FUN=winProportion)))
+  stats$averages$defenderWon <- mean(unlist(lapply(simulationResults$replicates, FUN=looseProportion)))
+  stats$averages$draw <- mean(unlist(lapply(simulationResults$replicates, FUN=drawProportion)))
+  stats$averages$meanRounds <- mean(unlist(lapply(simulationResults$replicates, FUN=meanValue, "rounds")))
+  stats$averages$meanAttackerCost <- mean(unlist(lapply(simulationResults$replicates, FUN=meanValue, "attackerCost")))
+  stats$averages$meanDefenderCost <- mean(unlist(lapply(simulationResults$replicates, FUN=meanValue, "defenderCost")))
+
+  for (i in 1:length(simulationResults$replicates)){
+    stats$replicates[[i]] <- list()
+    stats$replicates[[i]]$attackerWon <- winProportion(simulationResults$replicates[[i]])
+    stats$replicates[[i]]$defenderWon <- looseProportion(simulationResults$replicates[[i]])
+    stats$replicates[[i]]$draw <- drawProportion(simulationResults$replicates[[i]])
+    stats$replicates[[i]]$meanRounds <- meanValue(simulationResults$replicates[[i]], "rounds")
+    stats$replicates[[i]]$meanAttackerCost <- meanValue(simulationResults$replicates[[i]], "attackerCost")
+    stats$replicates[[i]]$meanDefenderCost <- meanValue(simulationResults$replicates[[i]], "defenderCost")
+  }
+
+  return(stats)
+
 }
 
 #' Roll dice

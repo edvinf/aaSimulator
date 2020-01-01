@@ -1,3 +1,7 @@
+#
+# Test simulate battles
+#
+
 s <- simulateBattles(c("inf", "art"), c("inf"), iterations = 10, replications = 2)
 expect_false(is.null(s$attackerStart))
 expect_false(is.null(s$defenderStart))
@@ -10,6 +14,21 @@ s <- simulateBattles(c("inf"), c("inf"), iterations = 1, replications = 1)
 expect_error(simulateBattles(c("inf"), c("inf"), iterations = 1, replications = 0), "Must run at least one replicate.")
 expect_error(simulateBattles(c("inf"), c("inf"), iterations = 0, replications = 1), "Must run at least one iteratation.")
 
+
+#
+# Test stats calc
+#
+s <- simulateBattles(c("inf", "art", "arm"), c("inf", "inf", "inf"), iterations = 20, replications = 3)
+stats <- calculateStats(s)
+expect_false(is.null(stats$attackerStart))
+expect_false(is.null(stats$defenderStart))
+expect_false(is.null(stats$replicates))
+expect_false(is.null(stats$averages))
+
+
+#
+# Test pop
+#
 
 popped <- pop(rep("ftr", 5), 4, c("ftr"))
 expect_equal(sum(popped), 1)
