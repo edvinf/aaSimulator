@@ -1,4 +1,3 @@
-
 #' Results from a battle
 #'
 #' a list with members
@@ -22,7 +21,7 @@ NULL
 #' \describe{
 #'  \item{attackerStart}{units for attacker at start of battle, formatted as oolAttacker}
 #'  \item{defenderStart}{units for defender at start of battle, formatted as oolDefender}
-#'  \item{replicates}{list of length m, with member for each replicate, each a list of length n containing \code{\link[aaSimulator]{battleResults}}
+#'  \item{replicates}{list of length m, with member for each replicate, each a list of length n containing \code{\link[aaSimulator]{battleResults}}}
 #' }
 #'
 #' @name simulationResults
@@ -56,12 +55,14 @@ NULL
 #'   \item{SUBM}{Flags that all attacking submarines should submerge when possible, after all units preceeding this virtual unit are lost.}
 #'   \item{RET}{Flags that attacker should retreat at first opportunity when all units preceeding this virtual unit are lost.}
 #'}
+#'
 #' @name ool
 #'
 NULL
 
 #' Simulate Battles
-#' @description Simulate Axis and Allies Battles
+#' @description
+#' Simulate Axis and Allies Battles
 #' @details
 #' The battle function 'FUN' implements the ruleset used.
 #' FUN must accept the arguments 'oolAttacker' and 'oolDefender' and return \code{\link[aaSimulator]{battleResults}}
