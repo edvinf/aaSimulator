@@ -59,15 +59,13 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- hits + roll(ones, 1)
   hits <- hits + roll(twos, 2)
 
-  rest <- table(rest)
   if (length(rest) == 0){
     return(hits)
   }
   for (i in 1:nrow(unitlist)){
-
-    if (unitlist$shortcut[i] %in% names(rest)){
+    if (unitlist$shortcut[i] %in% rest & !is.na(unitlist$baseAttack[i])){
       attack <- unitlist$baseAttack[i]
-      hits <- hits + roll(rest[unitlist$shortcut[i]], attack)
+      hits <- hits + roll(sum(unitlist$shortcut[i]==rest), attack)
     }
   }
 
@@ -78,15 +76,16 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
 #' @keywords internal
 defend <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- 0
-  defences <- unitlist[match(units, unitlist$shortcut),"baseDefence"]
 
-  if (length(defences) == 0){
+  if (length(units) == 0){
     return(0)
   }
 
-  defences <- defences[!is.na(defences)]
-  for (i in 1:6){
-    hits <- hits + roll(sum(defences==i), i)
+  for (i in 1:nrow(unitlist)){
+    if (unitlist$shortcut[i] %in% units & !is.na(unitlist$baseDefence[i])){
+      defence <- unitlist$baseDefence[i]
+      hits <- hits + roll(sum(unitlist$shortcut[i]==units), defence)
+    }
   }
   return(hits)
 }
