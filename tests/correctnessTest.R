@@ -1,3 +1,4 @@
+library(aaSimulator)
 checkAgainstTripleA <- function(stats, wins, draw, loose, rounds, TUVswing, triplaAiterations, descr){
 
   writeDiscr <- function(replicates, tripleA, name){

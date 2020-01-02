@@ -1,4 +1,3 @@
-
 #' Makes unit table for LHTR 2.0
 #' @details
 #'  a value for baseAttack and baseDefence indicate that the unit can be taken as a casuality.
@@ -7,32 +6,32 @@
 #' @noRd
 #' @keywords internal
 makeUnitList <- function(){
-  require(data.table)
-  infantry <- data.table(shortcut=as.character("inf"), name=as.character("Infantry"), cost=as.numeric(3), baseAttack=as.integer(1), baseDefence=as.integer(2), move=as.integer(1), type=as.character("Land"), virtualUnit=F)
-  artillery <- data.table(shortcut=as.character("art"), name=as.character("Artillery"), cost=as.numeric(4), baseAttack=as.integer(2), baseDefence=as.integer(2), move=as.integer(1), type=as.character("Land"), virtualUnit=F)
-  tank <- data.table(shortcut=as.character("arm"), name=as.character("Tank"), cost=as.numeric(5), baseAttack=as.integer(3), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Land"), virtualUnit=F)
-  antiaircraft <- data.table(shortcut=as.character("AA"), name=as.character("Anti-aircraft Gun"), cost=as.numeric(5), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(1), type=as.character("Land"), virtualUnit=T)
+
+  infantry <- data.table::data.table(shortcut=as.character("inf"), name=as.character("Infantry"), cost=as.numeric(3), baseAttack=as.integer(1), baseDefence=as.integer(2), move=as.integer(1), type=as.character("Land"), virtualUnit=F)
+  artillery <- data.table::data.table(shortcut=as.character("art"), name=as.character("Artillery"), cost=as.numeric(4), baseAttack=as.integer(2), baseDefence=as.integer(2), move=as.integer(1), type=as.character("Land"), virtualUnit=F)
+  tank <- data.table::data.table(shortcut=as.character("arm"), name=as.character("Tank"), cost=as.numeric(5), baseAttack=as.integer(3), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Land"), virtualUnit=F)
+  antiaircraft <- data.table::data.table(shortcut=as.character("AA"), name=as.character("Anti-aircraft Gun"), cost=as.numeric(5), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(1), type=as.character("Land"), virtualUnit=T)
 
   unitTable <- rbind(infantry, artillery, tank, antiaircraft)
 
-  fighter <- data.table(shortcut=as.character("ftr"), name=as.character("Fighter"), cost=as.numeric(10), baseAttack=as.integer(3), baseDefence=as.integer(4), move=as.integer(4), type=as.character("Air"), virtualUnit=F)
-  bomber <- data.table(shortcut=as.character("bmb"), name=as.character("Bomber"), cost=as.numeric(15), baseAttack=as.integer(4), baseDefence=as.integer(1), move=as.integer(6), type=as.character("Air"), virtualUnit=F)
+  fighter <- data.table::data.table(shortcut=as.character("ftr"), name=as.character("Fighter"), cost=as.numeric(10), baseAttack=as.integer(3), baseDefence=as.integer(4), move=as.integer(4), type=as.character("Air"), virtualUnit=F)
+  bomber <- data.table::data.table(shortcut=as.character("bmb"), name=as.character("Bomber"), cost=as.numeric(15), baseAttack=as.integer(4), baseDefence=as.integer(1), move=as.integer(6), type=as.character("Air"), virtualUnit=F)
 
   unitTable <- rbind(unitTable, fighter, bomber)
 
-  battleship <- data.table(shortcut=as.character("bb"), name=as.character("Battleship"), cost=as.numeric(24), baseAttack=as.integer(4), baseDefence=as.integer(4), move=as.integer(2),type=as.character("Sea"), virtualUnit=F)
-  battleshipbombardment <- data.table(shortcut=as.character("BBomb"), name=as.character("Battleship offshore bombardment"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(2), type=as.character("Land"), virtualUnit=T)
-  battleshipfirst <- data.table(shortcut=as.character("BBx"), name=as.character("Battleship first hit"), cost=as.numeric(NA), baseAttack=as.integer(0), baseDefence=as.integer(0), move=as.integer(NA), type=as.character("Sea"), virtualUnit=T)
-  destroyer <- data.table(shortcut=as.character("dd"), name=as.character("Destroyer"), cost=as.numeric(12), baseAttack=as.integer(3), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
-  carrier <- data.table(shortcut=as.character("ac"), name=as.character("Aircraft Carrier"), cost=as.numeric(16), baseAttack=as.integer(1), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
-  submarine <- data.table(shortcut=as.character("sub"), name=as.character("Submarine"), cost=as.numeric(8), baseAttack=as.integer(2), baseDefence=as.integer(2), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
-  submerged <- data.table(shortcut=as.character("subm"), name=as.character("Submerged Submarine"), cost=as.numeric(8), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA), type=as.character("Sea"), virtualUnit=T)
-  transport <- data.table(shortcut=as.character("trn"), name=as.character("Transport"), cost=as.numeric(8),baseAttack=as.integer(0), baseDefence=as.integer(1), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
+  battleship <- data.table::data.table(shortcut=as.character("bb"), name=as.character("Battleship"), cost=as.numeric(24), baseAttack=as.integer(4), baseDefence=as.integer(4), move=as.integer(2),type=as.character("Sea"), virtualUnit=F)
+  battleshipbombardment <- data.table::data.table(shortcut=as.character("BBomb"), name=as.character("Battleship offshore bombardment"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(2), type=as.character("Land"), virtualUnit=T)
+  battleshipfirst <- data.table::data.table(shortcut=as.character("BBx"), name=as.character("Battleship first hit"), cost=as.numeric(NA), baseAttack=as.integer(0), baseDefence=as.integer(0), move=as.integer(NA), type=as.character("Sea"), virtualUnit=T)
+  destroyer <- data.table::data.table(shortcut=as.character("dd"), name=as.character("Destroyer"), cost=as.numeric(12), baseAttack=as.integer(3), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
+  carrier <- data.table::data.table(shortcut=as.character("ac"), name=as.character("Aircraft Carrier"), cost=as.numeric(16), baseAttack=as.integer(1), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
+  submarine <- data.table::data.table(shortcut=as.character("sub"), name=as.character("Submarine"), cost=as.numeric(8), baseAttack=as.integer(2), baseDefence=as.integer(2), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
+  submerged <- data.table::data.table(shortcut=as.character("subm"), name=as.character("Submerged Submarine"), cost=as.numeric(8), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA), type=as.character("Sea"), virtualUnit=T)
+  transport <- data.table::data.table(shortcut=as.character("trn"), name=as.character("Transport"), cost=as.numeric(8),baseAttack=as.integer(0), baseDefence=as.integer(1), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
 
   unitTable <- rbind(unitTable, battleship, battleshipbombardment, battleshipfirst, destroyer, carrier, submarine, submerged, transport)
 
-  retreat <- data.table(shortcut=as.character("RET"), name=as.character("Retreat action"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA),type=as.character("Control"), virtualUnit=T)
-  submerge <- data.table(shortcut=as.character("SUBM"), name=as.character("Submerge action"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA),type=as.character("Control"), virtualUnit=T)
+  retreat <- data.table::data.table(shortcut=as.character("RET"), name=as.character("Retreat action"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA),type=as.character("Control"), virtualUnit=T)
+  submerge <- data.table::data.table(shortcut=as.character("SUBM"), name=as.character("Submerge action"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA),type=as.character("Control"), virtualUnit=T)
 
   unitTable <- rbind(unitTable, retreat, submerge)
 
@@ -42,7 +41,7 @@ makeUnitList <- function(){
 #' @noRd
 #' @keywords internal
 getPropertyLHTR <- function(unit, property){
-  return(lhtr2_units[lhtr2_units$shortcut==unit,][[property]])
+  return(aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut==unit,][[property]])
 }
 
 #' @noRd
@@ -60,7 +59,7 @@ attack <- function(units){
   hits <- hits + roll(ones, 1)
   hits <- hits + roll(twos, 2)
 
-  attacks <- lhtr2_units[match(rest, lhtr2_units$shortcut),"baseAttack"]
+  attacks <- aaSimulator::lhtr2_units[match(rest, aaSimulator::lhtr2_units$shortcut),"baseAttack"]
 
   if (length(attacks) == 0){
     return(hits)
@@ -77,7 +76,7 @@ attack <- function(units){
 #' @keywords internal
 defend <- function(units){
   hits <- 0
-  defences <- lhtr2_units[match(units, lhtr2_units$shortcut),"baseDefence"]
+  defences <- aaSimulator::lhtr2_units[match(units, aaSimulator::lhtr2_units$shortcut),"baseDefence"]
 
   if (length(defences) == 0){
     return(0)
@@ -119,7 +118,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   result$unitsAttacker <- oolAttacker
   result$unitsDefender <- oolDefender
 
-  remove_casualties <- function(hits, side, targetunits=lhtr2_units[!is.na(lhtr2_units$baseAttack),][["shortcut"]]){
+  remove_casualties <- function(hits, side, targetunits=aaSimulator::lhtr2_units[!is.na(aaSimulator::lhtr2_units$baseAttack),][["shortcut"]]){
 
     if (side == "attacker"){
       mask <- pop(result$unitsAttacker, hits, removeables = targetunits, skip=c("SUBM", "RET"))
@@ -226,7 +225,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     write(paste("Hit:,", subattackhits, "."))
   }
   if (!any("dd" %in% oolDefender)){
-    remove_casualties(subattackhits, "defender", targetunits = lhtr2_units[lhtr2_units$type == "Sea"])
+    remove_casualties(subattackhits, "defender", targetunits = aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$type == "Sea"])
     subattackhits <- 0
     if (subattackhits > 0 & verbose){
       write(paste("No defending destroyer present. Casualties removed"), stdout())
@@ -241,7 +240,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     write(paste("Hit:,", subdefendhits, "."), stdout())
   }
   if (!any("dd" %in% oolAttacker)){
-    remove_casualties(subdefendhits, "attacker", targetunits = lhtr2_units[lhtr2_units$type == "Sea"])
+    remove_casualties(subdefendhits, "attacker", targetunits = aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$type == "Sea"])
     subdefendhits <- 0
     if (subdefendhits > 0 & verbose){
       write(paste("No attacking destroyer present. Casualties removed"), stdout())
@@ -273,8 +272,8 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   remove_casualties(defendhits, "attacker")
 
   #remove sub casualties if not already removed
-  remove_casualties(subattackhits, "defender", targetunits = lhtr2_units[lhtr2_units$type == "Sea"])
-  remove_casualties(subdefendhits, "attacker", targetunits = lhtr2_units[lhtr2_units$type == "Sea"])
+  remove_casualties(subattackhits, "defender", targetunits = aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$type == "Sea"])
+  remove_casualties(subdefendhits, "attacker", targetunits = aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$type == "Sea"])
 
   # subs, submerge after casualties are resolved, if possible (replace with submerged sub, do not add to IPC loss)
   if (submergeAttack){
@@ -293,8 +292,8 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 
 #' @noRd
 calculateCost <- function(ool, remaining){
-  totalvalue <- sum(lhtr2_units[match(ool, lhtr2_units$shortcut),"cost"])
-  restvalue <- sum(lhtr2_units[match(remaining, lhtr2_units$shortcut),"cost"])
+  totalvalue <- sum(aaSimulator::lhtr2_units[match(ool, aaSimulator::lhtr2_units$shortcut),"cost"])
+  restvalue <- sum(aaSimulator::lhtr2_units[match(remaining, aaSimulator::lhtr2_units$shortcut),"cost"])
   return(totalvalue - restvalue)
 }
 
@@ -322,10 +321,10 @@ calculateCost <- function(ool, remaining){
 #' @export
 play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
 
-  if (all(c("Sea", "Land") %in% lhtr2_units[lhtr2_units$shortcut %in% oolAttacker,][["type"]])){
+  if (all(c("Sea", "Land") %in% aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% oolAttacker,][["type"]])){
     stop("Land and Sea units cannot be mixed in battle (except for offshore bombardment (BBomb) on land)")
   }
-  if (all(c("Sea", "Land") %in% lhtr2_units[lhtr2_units$shortcut %in% oolDefender,][["type"]])){
+  if (all(c("Sea", "Land") %in% aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% oolDefender,][["type"]])){
     stop("Land and Sea units cannot be mixed in battle")
   }
 
@@ -337,7 +336,7 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
     stop("Attacker OOL may not contain unit aa (Anti-aircraft Gun)")
   }
 
-  legalcodes <- lhtr2_units$shortcut
+  legalcodes <- aaSimulator::lhtr2_units$shortcut
   if (!all(oolAttacker %in% legalcodes)){
     illegalCodes <- oolAttacker[!(oolAttacker %in% legalcodes)]
     stop(paste("Syntax error:", illegalCodes))
@@ -396,13 +395,13 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
     if (length(result$unitsAttacker)==0){
       terminated <- T
     }
-    if (all(lhtr2_units[lhtr2_units$shortcut %in% result$unitsAttacker,][["virtualUnit"]])){
+    if (all(aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% result$unitsAttacker,][["virtualUnit"]])){
       terminated <- T
     }
     if (length(result$unitsDefender)==0){
       terminated <- T
     }
-    if (all(lhtr2_units[lhtr2_units$shortcut %in% result$unitsDefender,][["virtualUnit"]])){
+    if (all(aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% result$unitsDefender,][["virtualUnit"]])){
       terminated <- T
     }
 

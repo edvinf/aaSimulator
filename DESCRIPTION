@@ -11,7 +11,8 @@ Description: package for simulating Axis and Allies battles and visualising the 
 License: LGPL
 Encoding: UTF-8
 LazyData: true
-Import: data.table, ggplot2
+Depends: R (>= 2.10)
+Imports: data.table, ggplot2
 Suggests: 
     testthat (>= 2.1.0)
 RoxygenNote: 7.0.1
