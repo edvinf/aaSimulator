@@ -59,16 +59,18 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- hits + roll(ones, 1)
   hits <- hits + roll(twos, 2)
 
-  attacks <- unitlist[match(rest, unitlist$shortcut),"baseAttack"]
-
-  if (length(attacks) == 0){
+  rest <- table(rest)
+  if (length(rest) == 0){
     return(hits)
   }
+  for (i in 1:nrow(unitlist)){
 
-  attacks <- attacks[!is.na(attacks)]
-  for (i in 1:6){
-    hits <- hits + roll(sum(attacks==i), i)
+    if (unitlist$shortcut[i] %in% names(rest)){
+      attack <- unitlist$baseAttack[i]
+      hits <- hits + roll(rest[unitlist$shortcut[i]], attack)
+    }
   }
+
   return(hits)
 }
 
