@@ -147,6 +147,7 @@ NULL
 #' @description Calculates battle statistics for simulation
 #' @param simulationResults, formatted as: \code{\link[aaSimulator]{simulationResults}}
 #' @return \code{\link[aaSimulator]{simulationStats}}
+#' @export
 calculateStats <- function(simulationResults){
 
   # function for applying to each replicate
