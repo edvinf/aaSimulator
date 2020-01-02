@@ -65,7 +65,8 @@ NULL
 #' Simulate Axis and Allies Battles
 #' @details
 #' The battle function 'FUN' implements the ruleset used.
-#' FUN must accept the arguments 'oolAttacker' and 'oolDefender' and return \code{\link[aaSimulator]{battleResults}}
+#' FUN must accept the arguments 'oolAttacker' and 'oolDefender' and a logical argument suppressChecks,
+#' it must return \code{\link[aaSimulator]{battleResults}}
 #'
 #' @param oolAttacker character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}}
 #' @param oolDefender character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}}
@@ -103,13 +104,13 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
 
   for (i in 1:replications){
 
-    firstresult <- FUN(oolAttacker, oolDefender, ...)
+    firstresult <- FUN(oolAttacker, oolDefender, suppressChecks=F, ...)
 
     outcome <- list()
     outcome[[1]] <- firstresult
 
     for (j in 2:iterations){
-      lastresult <- FUN(oolAttacker, oolDefender, ...)
+      lastresult <- FUN(oolAttacker, oolDefender, suppressChecks=T, ...)
       outcome[[j]] <- lastresult
     }
 
@@ -215,7 +216,7 @@ roll <- function(n, hitvalue){
 #' Determines which units should be popped (removed) units of ool
 #' @param ool list of units ordered by preffered order of loss
 #' @param hits number of units to pop
-#' @param removeables list of valid targets for hits
+#' @param removeables list of valid targets for hits, if NULL, all targets are considered valid
 #' @param skip list of units to remove if encountered before other units that are to be removed.
 #' @return logical() vector with TRUE for units to keep
 #' @noRd
@@ -225,29 +226,38 @@ roll <- function(n, hitvalue){
 #' while both hits in removables and skip are removed
 #' but other hits are also removed (control directives such as RET and SUBM etc.)
 #' @noRd
-pop <- function(ool, hits, removeables, skip=c()){
+pop <- function(ool, hits, removeables=NULL, skip=c()){
 
   if (length(ool) == 0){
     return(logical())
   }
 
-  mask <- logical()
+  if (is.null(removeables)){
+    removable <- rep(T, length(ool))
+  }
+  else{
+    removable <- (ool %in% removeables)
+  }
+
+  skipped <- (ool %in% skip)
+
+  mask <- rep(T, length(ool))
   assigned <- 0
   for (i in 1:length(ool)){
     if (assigned < hits){
-      if (ool[i] %in% removeables){
-        mask <- c(mask, F)
+      if (removable[i]){
+        mask[i] <- F
         assigned <- assigned + 1
       }
-      else if (ool[i] %in% skip) {
-        mask <- c(mask, F)
+      else if (skipped[i]) {
+        mask[i] <- F
       }
       else{
-        mask <- c(mask, T)
+        #mask already T
       }
     }
     else{
-      mask <- c(mask, T)
+      return(mask)
     }
   }
   return(mask)

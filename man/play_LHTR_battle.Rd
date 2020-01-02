@@ -4,7 +4,13 @@
 \alias{play_LHTR_battle}
 \title{Play one battle}
 \usage{
-play_LHTR_battle(oolAttacker, oolDefender, retreat = NULL, verbose = F)
+play_LHTR_battle(
+  oolAttacker,
+  oolDefender,
+  retreat = NULL,
+  verbose = F,
+  suppressChecks = F
+)
 }
 \arguments{
 \item{oolAttacker}{character() order of loss for attacker}
@@ -14,6 +20,8 @@ play_LHTR_battle(oolAttacker, oolDefender, retreat = NULL, verbose = F)
 \item{retreat}{integer() round number after which attacker should retreat, if NULL, round number will not trigger retreat}
 
 \item{verbose}{logical() whether to print battle information to stdout}
+
+\item{suppressChecks}{suppressChecks on input}
 }
 \value{
 list() with members

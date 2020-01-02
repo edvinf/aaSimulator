@@ -46,7 +46,7 @@ getPropertyLHTR <- function(unit, property){
 
 #' @noRd
 #' @keywords internal
-attack <- function(units){
+attack <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- 0
 
   inf <- units[units == "inf"]
@@ -59,7 +59,7 @@ attack <- function(units){
   hits <- hits + roll(ones, 1)
   hits <- hits + roll(twos, 2)
 
-  attacks <- aaSimulator::lhtr2_units[match(rest, aaSimulator::lhtr2_units$shortcut),"baseAttack"]
+  attacks <- unitlist[match(rest, unitlist$shortcut),"baseAttack"]
 
   if (length(attacks) == 0){
     return(hits)
@@ -74,9 +74,9 @@ attack <- function(units){
 
 #' @noRd
 #' @keywords internal
-defend <- function(units){
+defend <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- 0
-  defences <- aaSimulator::lhtr2_units[match(units, aaSimulator::lhtr2_units$shortcut),"baseDefence"]
+  defences <- unitlist[match(units, unitlist$shortcut),"baseDefence"]
 
   if (length(defences) == 0){
     return(0)
@@ -107,10 +107,11 @@ defend <- function(units){
 #' @param submergeAttack logical() whether attacking submarines should submerge if possible
 #' @param submergeDefend logical() whether defending submarines should submerge if possible
 #' @param verbose logical() whether to print battle log to stdout
+#' @param unitlist option for reducing units used in lookup
 #' @return \code{\link[aaSimulator]{battleResults}}
 #' @noRd
 #' @keywords internal
-play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAttack=F, submergeDefend=F, verbose=F){
+play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAttack=F, submergeDefend=F, verbose=F, unitlist=aaSimulator::lhtr2_units){
   result <- list()
   result$ret <- F
   result$attackerLoss <- c()
@@ -118,7 +119,9 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   result$unitsAttacker <- oolAttacker
   result$unitsDefender <- oolDefender
 
-  remove_casualties <- function(hits, side, targetunits=aaSimulator::lhtr2_units[!is.na(aaSimulator::lhtr2_units$baseAttack),][["shortcut"]]){
+  baseAttackUnits <- unitlist[!is.na(unitlist$baseAttack),"shortcut"]
+
+  remove_casualties <- function(hits, side, targetunits=baseAttackUnits){
 
     if (side == "attacker"){
       mask <- pop(result$unitsAttacker, hits, removeables = targetunits, skip=c("SUBM", "RET"))
@@ -220,12 +223,13 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   if (verbose & length(oolAttacker[oolAttacker == "sub"])>0){
     write(paste("Attacking submarines fire:,", length(oolAttacker[oolAttacker == "sub"]), "dice."), stdout())
   }
-  subattackhits <- attack(oolAttacker[oolAttacker == "sub"])
+
+  subattackhits <- attack(oolAttacker[oolAttacker == "sub"], unitlist)
   if (verbose & length(oolAttacker[oolAttacker == "sub"])>0){
     write(paste("Hit:,", subattackhits, "."))
   }
   if (!any("dd" %in% oolDefender)){
-    remove_casualties(subattackhits, "defender", targetunits = aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$type == "Sea"])
+    remove_casualties(subattackhits, "defender", targetunits = unitlist[unitlist$type == "Sea", "shortcut"])
     subattackhits <- 0
     if (subattackhits > 0 & verbose){
       write(paste("No defending destroyer present. Casualties removed"), stdout())
@@ -235,12 +239,12 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   if (verbose & length(oolDefender[oolDefender == "sub"])>0){
     write(paste("Defending submarines fire:,", length(oolDefender[oolDefender == "sub"]), "dice."), stdout())
   }
-  subdefendhits <- attack(oolDefender[oolDefender == "sub"])
+  subdefendhits <- defend(oolDefender[oolDefender == "sub"], unitlist)
   if (verbose & length(oolDefender[oolDefender == "sub"])>0){
     write(paste("Hit:,", subdefendhits, "."), stdout())
   }
   if (!any("dd" %in% oolAttacker)){
-    remove_casualties(subdefendhits, "attacker", targetunits = aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$type == "Sea"])
+    remove_casualties(subdefendhits, "attacker", targetunits = unitlist[unitlist$type == "Sea", "shortcut"])
     subdefendhits <- 0
     if (subdefendhits > 0 & verbose){
       write(paste("No attacking destroyer present. Casualties removed"), stdout())
@@ -257,10 +261,10 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   }
 
   #roll rest attacker (art dep inf upgrade in attack())
-  attackhits <- attack(oolAttacker[oolAttacker != "sub"])
+  attackhits <- attack(oolAttacker[oolAttacker != "sub"], unitlist)
 
   #roll rest defender
-  defendhits <- defend(oolDefender[oolDefender != "sub"])
+  defendhits <- defend(oolDefender[oolDefender != "sub"], unitlist)
 
   if (verbose){
     write(paste("Attacker hit:", attackhits), stdout())
@@ -272,8 +276,8 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   remove_casualties(defendhits, "attacker")
 
   #remove sub casualties if not already removed
-  remove_casualties(subattackhits, "defender", targetunits = aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$type == "Sea"])
-  remove_casualties(subdefendhits, "attacker", targetunits = aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$type == "Sea"])
+  remove_casualties(subattackhits, "defender", targetunits = unitlist[unitlist$type == "Sea", "shortcut"])
+  remove_casualties(subdefendhits, "attacker", targetunits = unitlist[unitlist$type == "Sea", "shortcut"])
 
   # subs, submerge after casualties are resolved, if possible (replace with submerged sub, do not add to IPC loss)
   if (submergeAttack){
@@ -291,9 +295,9 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 }
 
 #' @noRd
-calculateCost <- function(ool, remaining){
-  totalvalue <- sum(aaSimulator::lhtr2_units[match(ool, aaSimulator::lhtr2_units$shortcut),"cost"])
-  restvalue <- sum(aaSimulator::lhtr2_units[match(remaining, aaSimulator::lhtr2_units$shortcut),"cost"])
+calculateCost <- function(ool, remaining, unitlist=aaSimulator::lhtr2_units){
+  totalvalue <- sum(unitlist[match(ool, unitlist$shortcut),"cost"])
+  restvalue <- sum(unitlist[match(remaining, unitlist$shortcut),"cost"])
   return(totalvalue - restvalue)
 }
 
@@ -313,51 +317,59 @@ calculateCost <- function(ool, remaining){
 #' @param oolDefender character() order of loss for defender
 #' @param retreat integer() round number after which attacker should retreat, if NULL, round number will not trigger retreat
 #' @param verbose logical() whether to print battle information to stdout
+#' @param suppressChecks suppressChecks on input
 #' @return list() with members
 #' \describe{
 #'  \item{unitsAttacker}{remaining units for attacker, formatted as oolAttacker}
 #'  \item{unitsDefender}{remaining units for defender, formatted as oolDefender}
 #'  }
 #' @export
-play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
+play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, suppressChecks=F){
 
-  if (all(c("Sea", "Land") %in% aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% oolAttacker,][["type"]])){
-    stop("Land and Sea units cannot be mixed in battle (except for offshore bombardment (BBomb) on land)")
-  }
-  if (all(c("Sea", "Land") %in% aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% oolDefender,][["type"]])){
-    stop("Land and Sea units cannot be mixed in battle")
-  }
-
-  if ("BBomb" %in% oolDefender){
-    stop("Defender OOL may not contain unit BBomb (offshore bombardment)")
-  }
-
-  if ("AA" %in% oolAttacker){
-    stop("Attacker OOL may not contain unit aa (Anti-aircraft Gun)")
+  if (!suppressChecks){
+    legalcodes <- aaSimulator::lhtr2_units$shortcut
+    if (!all(oolAttacker %in% legalcodes)){
+      illegalCodes <- oolAttacker[!(oolAttacker %in% legalcodes)]
+      stop(paste("Syntax error:", illegalCodes))
+    }
+    if (!all(oolDefender %in% legalcodes)){
+      illegalCodes <- oolDefender[!(oolDefender %in% legalcodes)]
+      stop(paste("Syntax error:", illegalCodes))
+    }
   }
 
-  legalcodes <- aaSimulator::lhtr2_units$shortcut
-  if (!all(oolAttacker %in% legalcodes)){
-    illegalCodes <- oolAttacker[!(oolAttacker %in% legalcodes)]
-    stop(paste("Syntax error:", illegalCodes))
-  }
-  if (!all(oolDefender %in% legalcodes)){
-    illegalCodes <- oolDefender[!(oolDefender %in% legalcodes)]
-    stop(paste("Syntax error:", illegalCodes))
-  }
-  if (sum(oolAttacker=="bb")!=sum(oolAttacker=="BBx")){
-    stop("BB (Battleship) and BBx (Battleship extra hit) is not included the same number of times.")
-  }
-  if (sum(oolDefender=="bb")!=sum(oolDefender=="BBx")){
-    stop("BB (Battleship) and BBx (Battleship extra hit) is not included the same number of times.")
-  }
 
-  if (sum(oolAttacker=="BBomb") > 0 & ("RET" %in% oolAttacker)){
-    stop("RET directive is not supported in combination woth BBomb")
-  }
+  #reduced unit list for peformance reasons
+  unitlist <- aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% c(oolAttacker, oolDefender),]
+  nonvirtualunits <- unitlist[!unitlist$virtualUnit, "shortcut"]
 
-  submergeAttack <- "SUBM" %in% oolAttacker
-  submergeDefend <- "SUBM" %in% oolDefender
+  if (!suppressChecks){
+    if (all(c("Sea", "Land") %in% unitlist[unitlist$shortcut %in% oolAttacker,][["type"]])){
+      stop("Land and Sea units cannot be mixed in battle (except for offshore bombardment (BBomb) on land)")
+    }
+    if (all(c("Sea", "Land") %in% unitlist[unitlist$shortcut %in% oolDefender,][["type"]])){
+      stop("Land and Sea units cannot be mixed in battle")
+    }
+
+    if ("BBomb" %in% oolDefender){
+      stop("Defender OOL may not contain unit BBomb (offshore bombardment)")
+    }
+
+    if ("AA" %in% oolAttacker){
+      stop("Attacker OOL may not contain unit aa (Anti-aircraft Gun)")
+    }
+
+    if (sum(oolAttacker=="bb")!=sum(oolAttacker=="BBx")){
+      stop("BB (Battleship) and BBx (Battleship extra hit) is not included the same number of times.")
+    }
+    if (sum(oolDefender=="bb")!=sum(oolDefender=="BBx")){
+      stop("BB (Battleship) and BBx (Battleship extra hit) is not included the same number of times.")
+    }
+
+    if (sum(oolAttacker=="BBomb") > 0 & ("RET" %in% oolAttacker)){
+      stop("RET directive is not supported in combination woth BBomb")
+    }
+  }
 
   round <- 1
   result <- list()
@@ -377,7 +389,7 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
         write(paste("Defender: ", paste(result$unitsDefender, collapse=",")), stdout())
       }
 
-      result <- play_LHTR_battle_round(result$unitsAttacker, result$unitsDefender, round, submergeAttack, submergeDefend, verbose = verbose)
+      result <- play_LHTR_battle_round(result$unitsAttacker, result$unitsDefender, round, F, F, verbose = verbose, unitlist = unitlist)
       result$rounds <- round
       round <- round + 1
     }
@@ -395,14 +407,14 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
     if (length(result$unitsAttacker)==0){
       terminated <- T
     }
-    if (all(aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% result$unitsAttacker,][["virtualUnit"]])){
-      terminated <- T
+    if (!terminated){
+      terminated <- !(any(result$unitsAttacker %in% nonvirtualunits))
     }
     if (length(result$unitsDefender)==0){
       terminated <- T
     }
-    if (all(aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% result$unitsDefender,][["virtualUnit"]])){
-      terminated <- T
+    if (!terminated){
+      terminated <- !(any(result$unitsDefender %in% nonvirtualunits))
     }
 
   }
@@ -425,8 +437,8 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
 
   result$defenderLoss <- NULL
   result$attackerLoss <- NULL
-  result$attackerCost <- calculateCost(oolAttacker, result$unitsAttacker)
-  result$defenderCost <- calculateCost(oolDefender, result$unitsDefender)
+  result$attackerCost <- calculateCost(oolAttacker, result$unitsAttacker, unitlist)
+  result$defenderCost <- calculateCost(oolDefender, result$unitsDefender, unitlist)
   result$ret <- NULL
   return(result)
 }

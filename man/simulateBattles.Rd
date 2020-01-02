@@ -34,5 +34,6 @@ Simulate Axis and Allies Battles
 }
 \details{
 The battle function 'FUN' implements the ruleset used.
-FUN must accept the arguments 'oolAttacker' and 'oolDefender' and return \code{\link[aaSimulator]{battleResults}}
+FUN must accept the arguments 'oolAttacker' and 'oolDefender' and a logical argument suppressChecks,
+it must return \code{\link[aaSimulator]{battleResults}}
 }
