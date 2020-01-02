@@ -45,11 +45,25 @@ stats <- calculateStats(s)
 checkAgainstTripleA(stats, .85, .01, .14, 2.51, -3.85, 2000, "ftr art arm inf vs 3 inf")
 
 
+#
+# Offshore bombardment
+#
+s <- simulateBattles(c("BBomb", "inf"), c("inf", "inf"), iterations = 2000, replications = 5)
+stats <- calculateStats(s)
+checkAgainstTripleA(stats, .17, .09, .74, 2.11, .58, 2000, "inf art arm ftr vs 3 inf")
+
+
+#
+# Battleship 2-hit test
+#
 
 s <- simulateBattles(c("BBx", "bb"), c("ac", "ftr"), iterations = 2000, replications = 5)
 stats <- calculateStats(s)
 checkAgainstTripleA(stats, .2, .2, .6, 1.84, -2.12, 2000, "BB vs ac ftr")
 
+#
+# sub-surpise test
+#
 
 s <- simulateBattles(c("BBx", "sub", "bb"), c("ac", "ftr"), iterations = 2000, replications = 5)
 stats <- calculateStats(s)
