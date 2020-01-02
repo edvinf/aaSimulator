@@ -120,7 +120,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   result$unitsAttacker <- oolAttacker
   result$unitsDefender <- oolDefender
 
-  baseAttackUnits <- unitlist[!is.na(unitlist$baseAttack),"shortcut"]
+  baseAttackUnits <- unitlist$shortcut[!is.na(unitlist$baseAttack)]
 
   remove_casualties <- function(hits, side, targetunits=baseAttackUnits){
 
@@ -230,7 +230,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     write(paste("Hit:,", subattackhits, "."))
   }
   if (!any("dd" %in% oolDefender)){
-    remove_casualties(subattackhits, "defender", targetunits = unitlist[unitlist$type == "Sea", "shortcut"])
+    remove_casualties(subattackhits, "defender", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
     subattackhits <- 0
     if (subattackhits > 0 & verbose){
       write(paste("No defending destroyer present. Casualties removed"), stdout())
@@ -245,7 +245,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     write(paste("Hit:,", subdefendhits, "."), stdout())
   }
   if (!any("dd" %in% oolAttacker)){
-    remove_casualties(subdefendhits, "attacker", targetunits = unitlist[unitlist$type == "Sea", "shortcut"])
+    remove_casualties(subdefendhits, "attacker", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
     subdefendhits <- 0
     if (subdefendhits > 0 & verbose){
       write(paste("No attacking destroyer present. Casualties removed"), stdout())
@@ -277,8 +277,8 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   remove_casualties(defendhits, "attacker")
 
   #remove sub casualties if not already removed
-  remove_casualties(subattackhits, "defender", targetunits = unitlist[unitlist$type == "Sea", "shortcut"])
-  remove_casualties(subdefendhits, "attacker", targetunits = unitlist[unitlist$type == "Sea", "shortcut"])
+  remove_casualties(subattackhits, "defender", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
+  remove_casualties(subdefendhits, "attacker", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
 
   # subs, submerge after casualties are resolved, if possible (replace with submerged sub, do not add to IPC loss)
   if (submergeAttack){
@@ -297,8 +297,8 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 
 #' @noRd
 calculateCost <- function(ool, remaining, unitlist=aaSimulator::lhtr2_units){
-  totalvalue <- sum(unitlist[match(ool, unitlist$shortcut),"cost"])
-  restvalue <- sum(unitlist[match(remaining, unitlist$shortcut),"cost"])
+  totalvalue <- sum(unitlist$cost[match(ool, unitlist$shortcut)])
+  restvalue <- sum(unitlist$cost[match(remaining, unitlist$shortcut)])
   return(totalvalue - restvalue)
 }
 
@@ -342,7 +342,7 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
 
   #reduced unit list for peformance reasons
   unitlist <- aaSimulator::lhtr2_units[aaSimulator::lhtr2_units$shortcut %in% c(oolAttacker, oolDefender),]
-  nonvirtualunits <- unitlist[!unitlist$virtualUnit, "shortcut"]
+  nonvirtualunits <- unitlist$shortcut[!unitlist$virtualUnit]
 
   if (!suppressChecks){
     if (all(c("Sea", "Land") %in% unitlist[unitlist$shortcut %in% oolAttacker,][["type"]])){
