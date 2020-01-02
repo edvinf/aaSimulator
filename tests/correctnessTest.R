@@ -43,3 +43,18 @@ checkAgainstTripleA(stats, .90, .02, .07, 2.29, 2.06, 2000, "inf art arm ftr vs 
 s <- simulateBattles(c("ftr", "art", "arm", "inf"), c("inf", "inf", "inf"), iterations = 2000, replications = 5)
 stats <- calculateStats(s)
 checkAgainstTripleA(stats, .85, .01, .14, 2.51, -3.85, 2000, "ftr art arm inf vs 3 inf")
+
+
+
+s <- simulateBattles(c("BBx", "bb"), c("ac", "ftr"), iterations = 2000, replications = 5)
+stats <- calculateStats(s)
+checkAgainstTripleA(stats, .2, .2, .6, 1.84, -2.12, 2000, "BB vs ac ftr")
+
+
+s <- simulateBattles(c("BBx", "sub", "bb"), c("ac", "ftr"), iterations = 2000, replications = 5)
+stats <- calculateStats(s)
+checkAgainstTripleA(stats, .68, .12, .19, 2.09, 11.01, 2000, "BB vs ac ftr")
+
+s <- simulateBattles(c("BBx", "sub", "bb"), c("ac", "dd"), iterations = 2000, replications = 5)
+stats <- calculateStats(s)
+checkAgainstTripleA(stats, .77, .10, .13, 2.06, 16.43, 2000, "BB vs ac dd")

@@ -262,10 +262,10 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   }
 
   #roll rest attacker (art dep inf upgrade in attack())
-  attackhits <- attack(oolAttacker[oolAttacker != "sub"], unitlist)
+  attackhits <- attack(result$unitsAttacker[result$unitsAttacker != "sub"], unitlist)
 
   #roll rest defender
-  defendhits <- defend(oolDefender[oolDefender != "sub"], unitlist)
+  defendhits <- defend(result$unitsDefender[result$unitsDefender != "sub"], unitlist)
 
   if (verbose){
     write(paste("Attacker hit:", attackhits), stdout())
@@ -297,8 +297,9 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 
 #' @noRd
 calculateCost <- function(ool, remaining, unitlist=aaSimulator::lhtr2_units){
-  totalvalue <- sum(unitlist$cost[match(ool, unitlist$shortcut)])
-  restvalue <- sum(unitlist$cost[match(remaining, unitlist$shortcut)])
+
+  totalvalue <- sum(unitlist$cost[match(ool, unitlist$shortcut)], na.rm=T) #ignore virutal units
+  restvalue <- sum(unitlist$cost[match(remaining, unitlist$shortcut)], na.rm=T)
   return(totalvalue - restvalue)
 }
 

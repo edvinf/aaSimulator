@@ -18,6 +18,10 @@ expect_error(simulateBattles(c("inf"), c("inf"), iterations = 0, replications = 
 s <- simulateBattles(c("ftr"), c("AA"), iterations = 1, replications = 1)
 expect_true(!is.na(s$replicates[[1]][[1]]$rounds))
 
+# corrected bug: cost not calculated when virtual units are invovled
+s <- simulateBattles(c("BBx", "sub", "sub", "bb"), c("trn", "trn", "ac", "ftr", "ftr"), iterations = 2, replications = 1)
+expect_false(is.na(s$replicates[[1]][[1]]$attackerCost))
+
 #
 # Test stats calc
 #
