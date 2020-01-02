@@ -11,7 +11,7 @@ makeUnitList <- function(){
   infantry <- data.table(shortcut=as.character("inf"), name=as.character("Infantry"), cost=as.numeric(3), baseAttack=as.integer(1), baseDefence=as.integer(2), move=as.integer(1), type=as.character("Land"), virtualUnit=F)
   artillery <- data.table(shortcut=as.character("art"), name=as.character("Artillery"), cost=as.numeric(4), baseAttack=as.integer(2), baseDefence=as.integer(2), move=as.integer(1), type=as.character("Land"), virtualUnit=F)
   tank <- data.table(shortcut=as.character("arm"), name=as.character("Tank"), cost=as.numeric(5), baseAttack=as.integer(3), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Land"), virtualUnit=F)
-  antiaircraft <- data.table(shortcut=as.character("aa"), name=as.character("Anti-aircraft Gun"), cost=as.numeric(5), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(1), type=as.character("Land"), virtualUnit=F)
+  antiaircraft <- data.table(shortcut=as.character("AA"), name=as.character("Anti-aircraft Gun"), cost=as.numeric(5), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(1), type=as.character("Land"), virtualUnit=T)
 
   unitTable <- rbind(infantry, artillery, tank, antiaircraft)
 
@@ -43,16 +43,6 @@ makeUnitList <- function(){
 #' @keywords internal
 getPropertyLHTR <- function(unit, property){
   return(lhtr2_units[lhtr2_units$shortcut==unit,][[property]])
-}
-
-#' @noRd
-#' @keywords internal
-getCostLHTR <- function(units){
-  cost <- 0
-  for (u in units){
-    cost <- cost + getPropertyLHTR(u, "cost")
-  }
-  return(cost)
 }
 
 #' @noRd
@@ -105,19 +95,20 @@ defend <- function(units){
 #' Play round
 #' @description Play one round of battle follwing Larry Harris Tournament Rules (LHTR 2.0) for Axis and Allies Revised edition.
 #' @details
-#'  units for oolAttacker and oolDefender accepts all units specified in \code{link[aaSimulator]{simulateBattles}}
-#' @param oolAttacker character() vector of units for the attacker order by loss preference
-#' @param oolDefender character() vector of units for the defender order by loss preference
+#'  units for oolAttacker and oolDefender accepts all units specified in \code{\link[aaSimulator]{ool}}
+#'
+#'  LHTR 2.0 does only allow one antiaircraft gun to fire for each territory.
+#'  Only one shot will be fired for each plane, regardless of how many aa are listed in 'oolDefender'.
+#'  To simulate units flying over territories with AA-guns en-route to battle, this must be modelled as a separate battle.
+#'
+#'
+#' @param oolAttacker character() vector of units for the attacker order by loss preference, formatted as \code{\link[aaSimulator]{ool}}
+#' @param oolDefender character() vector of units for the defender order by loss preference, formatted as \code{\link[aaSimulator]{ool}}
 #' @param roundnr integer() number of the round of battle played, enumerating from 1.
 #' @param submergeAttack logical() whether attacking submarines should submerge if possible
 #' @param submergeDefend logical() whether defending submarines should submerge if possible
 #' @param verbose logical() whether to print battle log to stdout
-#' @return list() with members
-#'  \item{attackerLoss}{integer() attacker IPC loss}
-#'  \item{defenderLoss}{integer() defender IPC loss}
-#'  \item{unitsAttacker}{character() vector with units for the attacker after round}
-#'  \item{unitsDefender}{character() vector with units for the defender after round}
-#'  \item{ret}{retreat directive encountered when resolving casualties}
+#' @return \code{\link[aaSimulator]{battleResults}}
 #' @noRd
 #' @keywords internal
 play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAttack=F, submergeDefend=F, verbose=F){
@@ -163,7 +154,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 
   if (roundnr == 1){
 
-    if ("aa" %in% oolDefender){
+    if ("AA" %in% oolDefender){
 
       #generalize to get units from table for all air
       aaftr <- sum(oolAttacker == "ftr")
@@ -194,6 +185,9 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
         }
 
       }
+
+      #remove AA guns from defenders units
+      result$unitsDefender <- result$unitsDefender[result$unitsDefender != "AA"]
     }
 
     #
@@ -215,6 +209,9 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
         write(paste("Hit: ", bbombhit, ". Casualties removed.", sep=""), stdout())
       }
     }
+
+    #remove offshor bombardment from ool
+    result$unitsAttacker <- result$unitsAttacker[result$unitsAttacker != "BBomb"]
 
   }
 
@@ -336,7 +333,7 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
     stop("Defender OOL may not contain unit BBomb (offshore bombardment)")
   }
 
-  if ("aa" %in% oolAttacker){
+  if ("AA" %in% oolAttacker){
     stop("Attacker OOL may not contain unit aa (Anti-aircraft Gun)")
   }
 
@@ -363,13 +360,29 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
   submergeAttack <- "SUBM" %in% oolAttacker
   submergeDefend <- "SUBM" %in% oolDefender
 
-  round <- 0
+  round <- 1
   result <- list()
   result$unitsAttacker <- oolAttacker
   result$unitsDefender <- oolDefender
   result$ret <- F
   terminated <- F
   while (!terminated){
+
+
+    if (!terminated){
+
+      if (verbose){
+        write(paste("------"), stdout())
+        write(paste("Playing round:", round), stdout())
+        write(paste("Attacker: ", paste(result$unitsAttacker, collapse = ",")), stdout())
+        write(paste("Defender: ", paste(result$unitsDefender, collapse=",")), stdout())
+      }
+
+      result <- play_LHTR_battle_round(result$unitsAttacker, result$unitsDefender, round, submergeAttack, submergeDefend, verbose = verbose)
+      result$rounds <- round
+      round <- round + 1
+    }
+
 
     # Battle termination criteria
     if (!is.null(retreat)){
@@ -383,28 +396,14 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
     if (length(result$unitsAttacker)==0){
       terminated <- T
     }
-    if (all(is.na(lhtr2_units[lhtr2_units$shortcut %in% result$unitsAttacker,][["baseAttack"]]))){
+    if (all(lhtr2_units[lhtr2_units$shortcut %in% result$unitsAttacker,][["virtualUnit"]])){
       terminated <- T
     }
     if (length(result$unitsDefender)==0){
       terminated <- T
     }
-    if (all(is.na(lhtr2_units[lhtr2_units$shortcut %in% result$unitsDefender,][["baseDefence"]]))){
+    if (all(lhtr2_units[lhtr2_units$shortcut %in% result$unitsDefender,][["virtualUnit"]])){
       terminated <- T
-    }
-
-    if (!terminated){
-
-      if (verbose){
-        write(paste("------"), stdout())
-        write(paste("Playing round:", round), stdout())
-        write(paste("Attacker: ", paste(result$unitsAttacker, collapse = ",")), stdout())
-        write(paste("Defender: ", paste(result$unitsDefender, collapse=",")), stdout())
-      }
-
-      round <- round +1
-      result <- play_LHTR_battle_round(result$unitsAttacker, result$unitsDefender, round, submergeAttack, submergeDefend, verbose = verbose)
-      result$rounds <- round
     }
 
   }
@@ -415,6 +414,14 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F){
     write(paste("Attacker: ", paste(result$unitsAttacker, collapse = ",")), stdout())
     write(paste("Defender: ", paste(result$unitsDefender, collapse=",")), stdout())
     write(paste("------"), stdout())
+  }
+
+  #resurface submerged subs for correct tallying.
+  if (sum(result$unitsAttacker == "subm") > 0){
+    result$unitsAttacker[result$unitsAttacker == "subm"] <- "sub"
+  }
+  if (sum(result$unitsDefender == "subm") > 0){
+    result$unitsAttacker[result$unitsDefender == "subm"] <- "sub"
   }
 
   result$defenderLoss <- NULL

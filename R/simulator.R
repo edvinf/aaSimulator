@@ -3,8 +3,8 @@
 #'
 #' a list with members
 #' \describe{
-#'  \item{unitsAttacker}{character() vector with the remaining units for attacker}
-#'  \item{unitsDefender}{character() vector with the remaining units for defender}
+#'  \item{unitsAttacker}{character() vector with the remaining units for attacker. Virtual units should not be included.}
+#'  \item{unitsDefender}{character() vector with the remaining units for defender. Virtual units should not be included.}
 #'  \item{rounds}{integer() the number of rounds in the battler}
 #'  \item{attackerCost}{numeric() The cost of units lost for attacker}
 #'  \item{defenderCost}{numeric() The cost of units lost for defender}
@@ -46,11 +46,11 @@ NULL
 #'   \item{dd}{Destroyer}
 #'   \item{ac}{Aircraft Carrier}
 #'   \item{bb}{Battleship}
-#'   \item{aa}{Anti-aircraft Gun. Most rule sets will allow only one per battle.}
 #'}
 #'
 #'  Some common virtual units:
 #'\describe{
+#'   \item{AA}{Anti-aircraft Gun. Considered a virtual unit for rule sets where it can not be taken as casualty}
 #'   \item{BBomb}{Offshore bombardment from Battleship, supporting amphibious assults.}
 #'   \item{BBx}{The first hit of a battleship for rulesets with two-hit capabilities. Modelled as a virtual unit with 0 in attack and defense.}
 #'   \item{SUBM}{Flags that all attacking submarines should submerge when possible, after all units preceeding this virtual unit are lost.}
@@ -126,7 +126,7 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
 #'  \item{attackerStart}{units for attacker at start of battle, formatted as oolAttacker}
 #'  \item{defenderStart}{units for defender at start of battle, formatted as oolDefender}
 #'  \item{avereages}{stats averaged over replicates}
-#'  \item{replicates}{list with stats for all replicates of simulation}
+#'  \item{replicates}{vectors with stats for all replicates of simulation}
 #' }
 #'
 #' Both 'averages' and the 'replicates' contain the stats:
@@ -155,6 +155,11 @@ calculateStats <- function(simulationResults){
     return(mean(unlist(lapply(repl, FUN = function(x){x[[slot]]}))))
   }
 
+  meanCostDiff <- function(repl){
+    return(mean(unlist(lapply(repl, FUN = function(x){x[["defenderCost"]] - x[["attackerCost"]]}))))
+  }
+
+
   winProportion <- function(repl){
     return(sum(unlist(lapply(repl, FUN = function(x){length(x[["unitsAttacker"]]) > 0 & length(x[["unitsDefender"]]) == 0}))) / length(repl))
   }
@@ -178,16 +183,15 @@ calculateStats <- function(simulationResults){
   stats$averages$meanRounds <- mean(unlist(lapply(simulationResults$replicates, FUN=meanValue, "rounds")))
   stats$averages$meanAttackerCost <- mean(unlist(lapply(simulationResults$replicates, FUN=meanValue, "attackerCost")))
   stats$averages$meanDefenderCost <- mean(unlist(lapply(simulationResults$replicates, FUN=meanValue, "defenderCost")))
+  stats$averages$meanCostDifference <- mean(unlist(lapply(simulationResults$replicates, FUN=meanCostDiff)))
 
-  for (i in 1:length(simulationResults$replicates)){
-    stats$replicates[[i]] <- list()
-    stats$replicates[[i]]$attackerWon <- winProportion(simulationResults$replicates[[i]])
-    stats$replicates[[i]]$defenderWon <- looseProportion(simulationResults$replicates[[i]])
-    stats$replicates[[i]]$draw <- drawProportion(simulationResults$replicates[[i]])
-    stats$replicates[[i]]$meanRounds <- meanValue(simulationResults$replicates[[i]], "rounds")
-    stats$replicates[[i]]$meanAttackerCost <- meanValue(simulationResults$replicates[[i]], "attackerCost")
-    stats$replicates[[i]]$meanDefenderCost <- meanValue(simulationResults$replicates[[i]], "defenderCost")
-  }
+  stats$replicates$attackerWon <- unlist(lapply(simulationResults$replicates, FUN=winProportion))
+  stats$replicates$defenderWon <- unlist(lapply(simulationResults$replicates, FUN=looseProportion))
+  stats$replicates$draw <- unlist(lapply(simulationResults$replicates, FUN=drawProportion))
+  stats$replicates$meanRounds <- unlist(lapply(simulationResults$replicates, FUN=meanValue, "rounds"))
+  stats$replicates$meanAttackerCost <- unlist(lapply(simulationResults$replicates, FUN=meanValue, "attackerCost"))
+  stats$replicates$meanDefenderCost <- unlist(lapply(simulationResults$replicates, FUN=meanValue, "defenderCost"))
+  stats$replicates$meanCostDifference <- unlist(lapply(simulationResults$replicates, FUN=meanCostDiff))
 
   return(stats)
 

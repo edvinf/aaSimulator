@@ -14,6 +14,9 @@ s <- simulateBattles(c("inf"), c("inf"), iterations = 1, replications = 1)
 expect_error(simulateBattles(c("inf"), c("inf"), iterations = 1, replications = 0), "Must run at least one replicate.")
 expect_error(simulateBattles(c("inf"), c("inf"), iterations = 0, replications = 1), "Must run at least one iteratation.")
 
+# corrected bug: premature termination when only aa guns are defending.
+s <- simulateBattles(c("ftr"), c("AA"), iterations = 1, replications = 1)
+expect_true(!is.na(s$replicates[[1]][[1]]$rounds))
 
 #
 # Test stats calc
