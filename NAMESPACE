@@ -2,6 +2,7 @@
 
 export(calculatePosteriorDistribution)
 export(calculateStats)
+export(makePosteriorDistributionPlot)
 export(play_LHTR_battle)
 export(roll)
 export(simulateBattles)

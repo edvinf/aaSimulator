@@ -12,7 +12,7 @@ calculatePosteriorDistribution(simulationResults, side = "attacker")
 \item{side}{character(), side to calculate distribution for, either 'attacker' or 'defender'}
 }
 \value{
-data.table with posterior probabilities of survival for each unit in ool. Each replicate is represented by one row.
+data.table with posterior probabilities of survival for each unit in ool (in original order). Each replicate is represented by one row.
 }
 \description{
 Calculate posterior distribution for battle
