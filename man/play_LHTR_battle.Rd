@@ -34,13 +34,19 @@ list() with members
 Plays one battle following Larry Harris Tournament Ruls for Axis and Allies Revised edition (LHTR 2.0)
 }
 \details{
-In addition to the standard options, the attacker and defender OOL supports the directives:
+units for oolAttacker and oolDefender accepts all units specified in \code{\link[aaSimulator]{ool}}
+
+ In addition to the standard options, the attacker and defender OOL supports the directives:
  \describe{
-  \item{+sumberge}{Submarines submerge at first opportunity (after any round of combat with no enemy destroyer present)}
+  \item{+sumberge}{Submarines submerge at first opportunity when all units preceeding this directive is lost.}
   }
  In addition to the standard options, the attacker OOL supports the directives:
  \describe{
-  \item{+roundretreat <n>}{Attacker will retreat after round n.}
   \item{+ret}{Attacker will retreat when all units preceeding this directive is lost.}
  }
+
+ LHTR 2.0 does only allow one antiaircraft gun to fire for each territory.
+ Only one shot will be fired for each plane, regardless of how many aa are listed in 'oolDefender'.
+ To simulate units flying over territories with AA-guns en-route to battle, this must be modelled as a separate battle.
+ Battle termination conditions are check _after_ each round of battle, so it is possible ot set up a simulation of only aircrafts vs AA.
 }

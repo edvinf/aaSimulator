@@ -32,6 +32,22 @@ expect_false(is.null(stats$defenderStart))
 expect_false(is.null(stats$replicates))
 expect_false(is.null(stats$averages))
 
+#
+# Test posterier distr. calc
+#
+s <- simulateBattles(c("inf", "art", "arm"), c("inf", "inf"), iterations = 20, replications = 3)
+
+postAttack <- calculatePosteriorDistribution(s, "attacker")
+expect_equal(nrow(postAttack), 3)
+expect_equal(ncol(postAttack), 3)
+expect_equal(names(postAttack), c("inf", "art", "arm"))
+
+postDefend <- calculatePosteriorDistribution(s, "defender")
+expect_equal(nrow(postDefend), 3)
+expect_equal(ncol(postDefend), 2)
+expect_equal(names(postDefend), c("inf", "inf"))
+
+expect_error(calculatePosteriorDistribution(s, "otherside"))
 
 #
 # Test pop

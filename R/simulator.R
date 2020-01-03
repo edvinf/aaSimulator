@@ -200,6 +200,49 @@ calculateStats <- function(simulationResults){
 
 }
 
+#' Determine which of units in start survived
+#' @noRd
+makeSurvivalMask <- function(start, remain){
+
+  startrev <- rev(start)
+  for (e in remain){
+    startrev[match(e, startrev)] <- NA
+  }
+  return(is.na(rev(startrev)))
+}
+
+#' posterior distribution
+#' @description
+#'  Calculate posterior distribution for battle
+#' @param simulationResults, formatted as: \code{\link[aaSimulator]{simulationResults}}
+#' @param side character(), side to calculate distribution for, either 'attacker' or 'defender'
+#' @return data.table with posterior probabilities of survival for each unit in ool. Each replicate is represented by one row.
+#' @export
+calculatePosteriorDistribution <- function(simulationResults, side="attacker"){
+
+  if (side == "attacker"){
+    slot <- "unitsAttacker"
+    startslot <- "attackerStart"
+  }
+  else if( side == "defender"){
+    slot <- "unitsDefender"
+    startslot <- "defenderStart"
+  }
+  else{
+    stop(paste("Side", side, "not recognized."))
+  }
+
+
+  postDrepl <- function(repl){
+    survivalmasks <- lapply(repl, FUN=function(x){makeSurvivalMask(simulationResults[[startslot]], x[[slot]])})
+    post <- colSums(do.call(rbind, survivalmasks))/length(survivalmasks)
+    names(post) <- simulationResults[[startslot]]
+    return(post)
+  }
+
+  return(data.table::as.data.table(do.call(rbind, lapply(simulationResults$replicates, FUN=postDrepl))))
+}
+
 #' Roll dice
 #' @description Rolls a set of six-sided dice, and determine number of hits.
 #' @param n number of dice to roll
