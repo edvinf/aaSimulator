@@ -50,9 +50,9 @@ checkAgainstTripleA(stats, .41, .20, .38, 1.42, -4.02, 2000, "ftr vs  inf AA")
 # checkAgainstTripleA(stats, .81, .09, .10, 1.35, -4.72, 2000, "2 jftr vs inf AA")
 #
 
-s <- simulateBattles(c("Hbmb"), c("inf", "AA"), iterations = 2000, replications = 10)
+s <- simulateBattles(c("hbmb"), c("inf", "AA"), iterations = 2000, replications = 10)
 stats <- calculateStats(s)
-checkAgainstTripleA(stats, .54, .27, .19, 1.07, -4.56, 2000, "Hbmb vs in AA")
+checkAgainstTripleA(stats, .54, .27, .19, 1.07, -4.56, 2000, "hbmb vs in AA")
 
 
 #

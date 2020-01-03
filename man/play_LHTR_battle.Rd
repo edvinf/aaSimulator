@@ -36,13 +36,22 @@ Plays one battle following Larry Harris Tournament Ruls for Axis and Allies Revi
 \details{
 units for oolAttacker and oolDefender accepts all units specified in \code{\link[aaSimulator]{ool}}
 
+ In addition to the standard units, special units achieved through weapons development are supported:
+ \describe{
+  \item{Dbomb}{Destroyer offshore bombardment}
+  \item{jftr}{Jet Fighter}
+  \item{ssub}{Super Submarine}
+  \item{hbomb}{Heavy Bomber}
+ }
+ Weapons development that does not result in changes to battle stats (such as long-range aircraft) does not have separate unit codes.
+
  In addition to the standard options, the attacker and defender OOL supports the directives:
  \describe{
-  \item{+sumberge}{Submarines submerge at first opportunity when all units preceeding this directive is lost.}
+  \item{SUBM}{Submarines submerge at first opportunity when all units preceeding this directive is lost.}
   }
  In addition to the standard options, the attacker OOL supports the directives:
  \describe{
-  \item{+ret}{Attacker will retreat when all units preceeding this directive is lost.}
+  \item{RET}{Attacker will retreat when all units preceeding this directive is lost.}
  }
 
  LHTR 2.0 does only allow one antiaircraft gun to fire for each territory.

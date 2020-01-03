@@ -34,7 +34,7 @@ makeUnitList <- function(){
   supersubmarine <- data.table::data.table(shortcut=as.character("ssub"), name=as.character("Super Submarine (WD)"), cost=as.numeric(8), baseAttack=as.integer(3), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
   supersubmerged <- data.table::data.table(shortcut=as.character("ssubm"), name=as.character("Submerged Super Submarine (WD)"), cost=as.numeric(8), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA), type=as.character("Sea"), virtualUnit=T)
   destroyerbombardment <- data.table::data.table(shortcut=as.character("DBomb"), name=as.character("Destroyer offshore bombardment (WD)"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(2), type=as.character("Land"), virtualUnit=T)
-  heavybomber <- data.table::data.table(shortcut=as.character("Hbmb"), name=as.character("Heavy Bomber (WD)"), cost=as.numeric(15), baseAttack=as.integer(4), baseDefence=as.integer(1), move=as.integer(6), type=as.character("Air"), virtualUnit=F)
+  heavybomber <- data.table::data.table(shortcut=as.character("hbmb"), name=as.character("Heavy Bomber (WD)"), cost=as.numeric(15), baseAttack=as.integer(4), baseDefence=as.integer(1), move=as.integer(6), type=as.character("Air"), virtualUnit=F)
 
   unitTable <- rbind(unitTable, destroyerbombardment, jetfighter, supersubmarine, supersubmerged, heavybomber)
 
@@ -58,8 +58,8 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- 0
 
   inf <- units[units == "inf"]
-  hbmb <- units[units == "Hbmb"]
-  rest <- units[units != "inf" & units != "Hbmb"]
+  hbmb <- units[units == "hbmb"]
+  rest <- units[units != "inf" & units != "hbmb"]
   nart <- sum(rest == "art")
 
   twos <- min(length(inf), nart)
@@ -70,7 +70,7 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
 
   if (length(hbmb) > 0){
     for (b in hbmb){
-      attack <- unitlist$baseAttack[unitlist$shortcut == "Hbmb"]
+      attack <- unitlist$baseAttack[unitlist$shortcut == "hbmb"]
       hits <- hits + max(roll(1, attack), roll(1, attack))
     }
   }
@@ -93,12 +93,12 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
 defend <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- 0
 
-  hbmb <- units[units == "Hbmb"]
-  rest <- units[units != "Hbmb"]
+  hbmb <- units[units == "hbmb"]
+  rest <- units[units != "hbmb"]
 
   if (length(hbmb) > 0){
     for (b in hbmb){
-      defence <- unitlist$baseDefence[unitlist$shortcut == "Hbmb"]
+      defence <- unitlist$baseDefence[unitlist$shortcut == "hbmb"]
       hits <- hits + max(roll(1, defence), roll(1, defence))
     }
   }
@@ -183,7 +183,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     if ("AA" %in% oolDefender){
 
       aaftr <- sum(oolAttacker == "ftr")
-      aabmb <- sum(oolAttacker == "bmb" | oolAttacker == "Hbmb")
+      aabmb <- sum(oolAttacker == "bmb" | oolAttacker == "hbmb")
 
       if (verbose){
         write(paste("Firing aa gun,", aaftr + aabmb, "dice."), stdout())
@@ -203,7 +203,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
         }
 
         bmbhit <- roll(aabmb, 1)
-        remove_casualties(bmbhit, "attacker", c("bmb", "Hbmb"))
+        remove_casualties(bmbhit, "attacker", c("bmb", "hbmb"))
 
         if (verbose & bmbhit > 0){
           write(paste("Hit", bmbhit, "bmb. Casualties removed"), stdout())
@@ -355,13 +355,22 @@ calculateCost <- function(ool, remaining, unitlist=aaSimulator::lhtr2_units){
 #' @details
 #'  units for oolAttacker and oolDefender accepts all units specified in \code{\link[aaSimulator]{ool}}
 #'
+#'  In addition to the standard units, special units achieved through weapons development are supported:
+#'  \describe{
+#'   \item{Dbomb}{Destroyer offshore bombardment}
+#'   \item{jftr}{Jet Fighter}
+#'   \item{ssub}{Super Submarine}
+#'   \item{hbomb}{Heavy Bomber}
+#'  }
+#'  Weapons development that does not result in changes to battle stats (such as long-range aircraft) does not have separate unit codes.
+#'
 #'  In addition to the standard options, the attacker and defender OOL supports the directives:
 #'  \describe{
-#'   \item{+sumberge}{Submarines submerge at first opportunity when all units preceeding this directive is lost.}
+#'   \item{SUBM}{Submarines submerge at first opportunity when all units preceeding this directive is lost.}
 #'   }
 #'  In addition to the standard options, the attacker OOL supports the directives:
 #'  \describe{
-#'   \item{+ret}{Attacker will retreat when all units preceeding this directive is lost.}
+#'   \item{RET}{Attacker will retreat when all units preceeding this directive is lost.}
 #'  }
 #'
 #'  LHTR 2.0 does only allow one antiaircraft gun to fire for each territory.
@@ -496,9 +505,12 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
     result$unitsAttacker[result$unitsAttacker == "ssubm"] <- "ssub"
   }
   if (sum(result$unitsDefender == "subm") > 0){
-    result$unitsAttacker[result$unitsDefender == "subm"] <- "sub"
-    result$unitsAttacker[result$unitsDefender == "ssubm"] <- "ssub"
+    result$unitsDefender[result$unitsDefender == "subm"] <- "sub"
+    result$unitsDefender[result$unitsDefender == "ssubm"] <- "ssub"
   }
+
+  #add AA guns back in at end if included
+  result$unitsDefender <- c(result$unitsDefender, oolDefender[oolDefender == "AA"])
 
   result$defenderLoss <- NULL
   result$attackerLoss <- NULL
