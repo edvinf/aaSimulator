@@ -95,11 +95,6 @@ defend <- function(units, unitlist=aaSimulator::lhtr2_units){
 #' Play round
 #' @description Play one round of battle follwing Larry Harris Tournament Rules (LHTR 2.0) for Axis and Allies Revised edition.
 #' @details
-#'  units for oolAttacker and oolDefender accepts all units specified in \code{\link[aaSimulator]{ool}}
-#'
-#'  LHTR 2.0 does only allow one antiaircraft gun to fire for each territory.
-#'  Only one shot will be fired for each plane, regardless of how many aa are listed in 'oolDefender'.
-#'  To simulate units flying over territories with AA-guns en-route to battle, this must be modelled as a separate battle.
 #'
 #'
 #' @param oolAttacker character() vector of units for the attacker order by loss preference, formatted as \code{\link[aaSimulator]{ool}}
@@ -297,24 +292,32 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 
 #' @noRd
 calculateCost <- function(ool, remaining, unitlist=aaSimulator::lhtr2_units){
-
-  totalvalue <- sum(unitlist$cost[match(ool, unitlist$shortcut)], na.rm=T) #ignore virutal units
-  restvalue <- sum(unitlist$cost[match(remaining, unitlist$shortcut)], na.rm=T)
+  nonvirtual <- unitlist$shortcut[!unitlist$virtualUnit]
+  ool <- ool[ool %in% nonvirtual]
+  totalvalue <- sum(unitlist$cost[match(ool, unitlist$shortcut)])
+  restvalue <- sum(unitlist$cost[match(remaining, unitlist$shortcut)])
   return(totalvalue - restvalue)
 }
 
 #' Play one battle
 #' @description Plays one battle following Larry Harris Tournament Ruls for Axis and Allies Revised edition (LHTR 2.0)
 #' @details
+#'  units for oolAttacker and oolDefender accepts all units specified in \code{\link[aaSimulator]{ool}}
+#'
 #'  In addition to the standard options, the attacker and defender OOL supports the directives:
 #'  \describe{
-#'   \item{+sumberge}{Submarines submerge at first opportunity (after any round of combat with no enemy destroyer present)}
+#'   \item{+sumberge}{Submarines submerge at first opportunity when all units preceeding this directive is lost.}
 #'   }
 #'  In addition to the standard options, the attacker OOL supports the directives:
 #'  \describe{
-#'   \item{+roundretreat <n>}{Attacker will retreat after round n.}
 #'   \item{+ret}{Attacker will retreat when all units preceeding this directive is lost.}
 #'  }
+#'
+#'  LHTR 2.0 does only allow one antiaircraft gun to fire for each territory.
+#'  Only one shot will be fired for each plane, regardless of how many aa are listed in 'oolDefender'.
+#'  To simulate units flying over territories with AA-guns en-route to battle, this must be modelled as a separate battle.
+#'  Battle termination conditions are check _after_ each round of battle, so it is possible ot set up a simulation of only aircrafts vs AA.
+#'
 #' @param oolAttacker character() order of loss for attacker
 #' @param oolDefender character() order of loss for defender
 #' @param retreat integer() round number after which attacker should retreat, if NULL, round number will not trigger retreat

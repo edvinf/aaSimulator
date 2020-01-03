@@ -18,3 +18,12 @@ expect_gte(s$rounds, 1)
 
 expect_error(play_LHTR_battle(c("BBomb", "inf"), c("BBomb", "inf", "AA")))
 expect_error(play_LHTR_battle(c("bbomb", "inf"), c("inf", "AA")))
+
+#bugfix: virtual units was counted as lost in cost derermination
+cost <- calculateCost(c("AA", "inf"), c("inf"))
+expect_equal(cost, 0)
+
+cost <- calculateCost(c("AA", "inf"), c())
+expect_equal(cost, 3)
+
+s <- play_LHTR_battle(c("ftr"), c("AA"))
