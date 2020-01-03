@@ -304,23 +304,24 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   }
 
   #roll rest attacker (art dep inf upgrade in attack())
-  attackhits <- attack(result$unitsAttacker[result$unitsAttacker != "sub"], unitlist)
+  attackhits <- attack(result$unitsAttacker[result$unitsAttacker != "sub" & result$unitsAttacker != "ssub"], unitlist)
 
   #roll rest defender
-  defendhits <- defend(result$unitsDefender[result$unitsDefender != "sub"], unitlist)
+  defendhits <- defend(result$unitsDefender[result$unitsDefender != "sub" & result$unitsDefender != "ssub"], unitlist)
 
   if (verbose){
     write(paste("Attacker hit:", attackhits), stdout())
     write(paste("Defender hit:", defendhits), stdout())
   }
 
+  #remove sub casualties if not already removed
+  remove_casualties(subattackhits, "defender", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
+  remove_casualties(subdefendhits, "attacker", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
+
   #remove regular casualties
   remove_casualties(attackhits, "defender")
   remove_casualties(defendhits, "attacker")
 
-  #remove sub casualties if not already removed
-  remove_casualties(subattackhits, "defender", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
-  remove_casualties(subdefendhits, "attacker", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
 
   # subs, submerge after casualties are resolved, if possible (replace with submerged sub, do not add to IPC loss)
   if (submergeAttack){
