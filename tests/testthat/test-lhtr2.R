@@ -25,5 +25,3 @@ expect_equal(cost, 0)
 
 cost <- calculateCost(c("AA", "inf"), c())
 expect_equal(cost, 3)
-
-s <- play_LHTR_battle(c("ftr"), c("AA"))

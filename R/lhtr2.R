@@ -294,6 +294,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 calculateCost <- function(ool, remaining, unitlist=aaSimulator::lhtr2_units){
   nonvirtual <- unitlist$shortcut[!unitlist$virtualUnit]
   ool <- ool[ool %in% nonvirtual]
+  remaining <- remaining[remaining %in% nonvirtual]
   totalvalue <- sum(unitlist$cost[match(ool, unitlist$shortcut)])
   restvalue <- sum(unitlist$cost[match(remaining, unitlist$shortcut)])
   return(totalvalue - restvalue)
