@@ -30,6 +30,14 @@ makeUnitList <- function(){
 
   unitTable <- rbind(unitTable, battleship, battleshipbombardment, battleshipfirst, destroyer, carrier, submarine, submerged, transport)
 
+  jetfighter <- data.table::data.table(shortcut=as.character("jftr"), name=as.character("Jet Fighter (WD)"), cost=as.numeric(10), baseAttack=as.integer(3), baseDefence=as.integer(5), move=as.integer(4), type=as.character("Air"), virtualUnit=F)
+  supersubmarine <- data.table::data.table(shortcut=as.character("ssub"), name=as.character("Super Submarine (WD)"), cost=as.numeric(8), baseAttack=as.integer(3), baseDefence=as.integer(3), move=as.integer(2), type=as.character("Sea"), virtualUnit=F)
+  supersubmerged <- data.table::data.table(shortcut=as.character("ssubm"), name=as.character("Submerged Super Submarine (WD)"), cost=as.numeric(8), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA), type=as.character("Sea"), virtualUnit=T)
+  destroyerbombardment <- data.table::data.table(shortcut=as.character("DBomb"), name=as.character("Destroyer offshore bombardment (WD)"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(2), type=as.character("Land"), virtualUnit=T)
+  heavybomber <- data.table::data.table(shortcut=as.character("Hbmb"), name=as.character("Heavy Bomber (WD)"), cost=as.numeric(15), baseAttack=as.integer(4), baseDefence=as.integer(1), move=as.integer(6), type=as.character("Air"), virtualUnit=F)
+
+  unitTable <- rbind(unitTable, destroyerbombardment, jetfighter, supersubmarine, supersubmerged, heavybomber)
+
   retreat <- data.table::data.table(shortcut=as.character("RET"), name=as.character("Retreat action"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA),type=as.character("Control"), virtualUnit=T)
   submerge <- data.table::data.table(shortcut=as.character("SUBM"), name=as.character("Submerge action"), cost=as.numeric(NA), baseAttack=as.integer(NA), baseDefence=as.integer(NA), move=as.integer(NA),type=as.character("Control"), virtualUnit=T)
 
@@ -50,7 +58,8 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- 0
 
   inf <- units[units == "inf"]
-  rest <- units[units != "inf"]
+  hbmb <- units[units == "Hbmb"]
+  rest <- units[units != "inf" & units != "Hbmb"]
   nart <- sum(rest == "art")
 
   twos <- min(length(inf), nart)
@@ -58,6 +67,13 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
 
   hits <- hits + roll(ones, 1)
   hits <- hits + roll(twos, 2)
+
+  if (length(hbmb) > 0){
+    for (b in hbmb){
+      attack <- unitlist$baseAttack[unitlist$shortcut == "Hbmb"]
+      hits <- hits + max(roll(1, attack), roll(1, attack))
+    }
+  }
 
   if (length(rest) == 0){
     return(hits)
@@ -77,16 +93,28 @@ attack <- function(units, unitlist=aaSimulator::lhtr2_units){
 defend <- function(units, unitlist=aaSimulator::lhtr2_units){
   hits <- 0
 
-  if (length(units) == 0){
+  hbmb <- units[units == "Hbmb"]
+  rest <- units[units != "Hbmb"]
+
+  if (length(hbmb) > 0){
+    for (b in hbmb){
+      defence <- unitlist$baseDefence[unitlist$shortcut == "Hbmb"]
+      hits <- hits + max(roll(1, defence), roll(1, defence))
+    }
+  }
+
+  if (length(rest) == 0){
     return(0)
   }
 
+
   for (i in 1:nrow(unitlist)){
-    if (unitlist$shortcut[i] %in% units & !is.na(unitlist$baseDefence[i])){
+    if (unitlist$shortcut[i] %in% rest & !is.na(unitlist$baseDefence[i])){
       defence <- unitlist$baseDefence[i]
       hits <- hits + roll(sum(unitlist$shortcut[i]==units), defence)
     }
   }
+
   return(hits)
 }
 
@@ -154,9 +182,8 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 
     if ("AA" %in% oolDefender){
 
-      #generalize to get units from table for all air
       aaftr <- sum(oolAttacker == "ftr")
-      aabmb <- sum(oolAttacker == "bmb")
+      aabmb <- sum(oolAttacker == "bmb" | oolAttacker == "Hbmb")
 
       if (verbose){
         write(paste("Firing aa gun,", aaftr + aabmb, "dice."), stdout())
@@ -176,7 +203,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
         }
 
         bmbhit <- roll(aabmb, 1)
-        remove_casualties(bmbhit, "attacker", c("bmb"))
+        remove_casualties(bmbhit, "attacker", c("bmb", "Hbmb"))
 
         if (verbose & bmbhit > 0){
           write(paste("Hit", bmbhit, "bmb. Casualties removed"), stdout())
@@ -197,7 +224,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     if (bbs > 0){
 
       if (verbose){
-        write(paste("Firing Offshore bombardment,", bbs, "dice."), stdout())
+        write(paste("Firing Offshore bombardment (battleships),", bbs, "dice."), stdout())
       }
 
       bbombhit <- roll(bbs, 4)
@@ -208,20 +235,40 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
       }
     }
 
+    #remove offshore bombardment from ool
+    result$unitsAttacker <- result$unitsAttacker[result$unitsAttacker != "DBomb"]
+
+    dds <- sum(oolAttacker == "DBomb")
+    oolAttacker <- oolAttacker[oolAttacker != "DBomb"]
+
+    if (dds > 0){
+
+      if (verbose){
+        write(paste("Firing Offshore bombardment (destroyers),", dds, "dice."), stdout())
+      }
+
+      dbombhit <- roll(dds, 3)
+      remove_casualties(dbombhit, "defender")
+
+      if (verbose & dbombhit > 0){
+        write(paste("Hit: ", dbombhit, ". Casualties removed.", sep=""), stdout())
+      }
+    }
+
     #remove offshor bombardment from ool
-    result$unitsAttacker <- result$unitsAttacker[result$unitsAttacker != "BBomb"]
+    result$unitsAttacker <- result$unitsAttacker[result$unitsAttacker != "DBomb"]
 
   }
 
   #
   # submarines attack, remove casualties if surprise attack conditions met
   #
-  if (verbose & length(oolAttacker[oolAttacker == "sub"])>0){
-    write(paste("Attacking submarines fire:,", length(oolAttacker[oolAttacker == "sub"]), "dice."), stdout())
+  if (verbose & length(oolAttacker[oolAttacker == "sub" | oolAttacker == "ssub"])>0){
+    write(paste("Attacking submarines fire:,", sum(oolAttacker == "sub" | oolAttacker == "ssub"), "dice."), stdout())
   }
 
-  subattackhits <- attack(oolAttacker[oolAttacker == "sub"], unitlist)
-  if (verbose & length(oolAttacker[oolAttacker == "sub"])>0){
+  subattackhits <- attack(oolAttacker[oolAttacker == "sub" | oolAttacker == "ssub"], unitlist)
+  if (verbose & length(oolAttacker[oolAttacker == "sub" | oolAttacker == "ssub"])>0){
     write(paste("Hit:,", subattackhits, "."))
   }
   if (!any("dd" %in% oolDefender)){
@@ -232,11 +279,11 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
     }
   }
 
-  if (verbose & length(oolDefender[oolDefender == "sub"])>0){
-    write(paste("Defending submarines fire:,", length(oolDefender[oolDefender == "sub"]), "dice."), stdout())
+  if (verbose & length(oolDefender[oolDefender == "sub" | oolDefender == "ssub"])>0){
+    write(paste("Defending submarines fire:,", length(oolDefender[oolDefender == "sub" | oolDefender == "ssub"]), "dice."), stdout())
   }
-  subdefendhits <- defend(oolDefender[oolDefender == "sub"], unitlist)
-  if (verbose & length(oolDefender[oolDefender == "sub"])>0){
+  subdefendhits <- defend(oolDefender[oolDefender == "sub" | oolDefender == "ssub"], unitlist)
+  if (verbose & length(oolDefender[oolDefender == "sub" | oolDefender == "ssub"])>0){
     write(paste("Hit:,", subdefendhits, "."), stdout())
   }
   if (!any("dd" %in% oolAttacker)){
@@ -279,11 +326,13 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
   if (submergeAttack){
     if (!any("dd" %in% result$unitsDefender)){
       oolAttacker[oolAttacker == "sub"] <- "subm"
+      oolAttacker[oolAttacker == "ssub"] <- "ssubm"
     }
   }
   if (submergeDefend){
     if (!any("dd" %in% result$unitsAttacker)){
       oolDefender[oolDefender == "sub"] <- "subm"
+      oolDefender[oolDefender == "ssub"] <- "ssubm"
     }
   }
 
@@ -361,6 +410,10 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
       stop("Defender OOL may not contain unit BBomb (offshore bombardment)")
     }
 
+    if ("DBomb" %in% oolDefender){
+      stop("Defender OOL may not contain unit DBomb (offshore bombardment)")
+    }
+
     if ("AA" %in% oolAttacker){
       stop("Attacker OOL may not contain unit aa (Anti-aircraft Gun)")
     }
@@ -374,6 +427,9 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
 
     if (sum(oolAttacker=="BBomb") > 0 & ("RET" %in% oolAttacker)){
       stop("RET directive is not supported in combination woth BBomb")
+    }
+    if (sum(oolAttacker=="DBomb") > 0 & ("RET" %in% oolAttacker)){
+      stop("RET directive is not supported in combination woth DBomb")
     }
   }
 
@@ -436,9 +492,11 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
   #resurface submerged subs for correct tallying.
   if (sum(result$unitsAttacker == "subm") > 0){
     result$unitsAttacker[result$unitsAttacker == "subm"] <- "sub"
+    result$unitsAttacker[result$unitsAttacker == "ssubm"] <- "ssub"
   }
   if (sum(result$unitsDefender == "subm") > 0){
     result$unitsAttacker[result$unitsDefender == "subm"] <- "sub"
+    result$unitsAttacker[result$unitsDefender == "ssubm"] <- "ssub"
   }
 
   result$defenderLoss <- NULL
