@@ -4,7 +4,7 @@
 \name{lhtr2_units}
 \alias{lhtr2_units}
 \title{Table of units allowed in LHTR 2.0}
-\format{An object of class \code{data.table} (inherits from \code{data.frame}) with 16 rows and 8 columns.}
+\format{An object of class \code{data.table} (inherits from \code{data.frame}) with 21 rows and 8 columns.}
 \usage{
 data(lhtr2_units)
 }
