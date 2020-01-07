@@ -383,3 +383,76 @@ pop <- function(ool, hits, removeables=NULL, skip=c()){
   }
   return(mask)
 }
+
+
+#' @noRd
+constructOolsOpt <- function(cost, units, unittable){
+  ools <- list()
+  j<-1
+  for (i in 1:length(units)){
+    unitcost <- unittable$cost[unittable$shortcut == units[i]]
+    if (unitcost <= cost){
+      recOols <- constructOolsOpt(cost - unitcost, units[i:length(units)], unittable)
+      if (length(recOols) > 0){
+        for (ool in recOols){
+          ools[[j]] <- c(units[i], ool)
+          j <- j+1
+        }
+      }
+      else{
+        ools[j] <- c(units[i])
+        j <- j+1
+      }
+    }
+  }
+
+  return(ools)
+}
+
+#' Optimize units
+#' @description
+#'  Optimize unit configuration for fixed costs.
+#' @details
+#'  'units' denote order of unit groups, so that units=c("inf", "arm"), will try all combinations
+#'  of "inf" and "arm" allowed by the parameter 'cost', but always with all "inf" preceeding all "arm".
+#'
+#' @param cost The cost to optimize for, unit configurations must not exceed this cost
+#' @param iterations the number of iterations to run for each unit configuration
+#' @param replications the number of replicates to run for each unit configuration
+#' @param attacker ool for attacker, NULL if attacking units are to be optimized
+#' @param defender ool for defender, NULL if defending units are to be optimized
+#' @param units the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}.
+#' @param unittable table of unit properties, formatted as \code{\link[aaSimulator]{unitTable}}
+#' @return list containing the optimal unit configurations. That is the unit configuration that are optimal for the given cost on average,
+#'  and all unit configurations where some replicate peforms at least as good as the worst replicate of the optimum.
+#' @export
+optimizeUnits <- function(cost, iterations=1000, replications=3, attacker=NULL, defender=NULL, units=c(), unittable=lhtr2_units){
+
+  if (is.null(attacker) && is.null(defender)){
+    stop("'attacker' and 'defender' may not both be NULL.")
+  }
+
+  if (!is.null(attacker) && !is.null(defender)){
+    stop("'Either attacker' or 'defender' must be NULL.")
+  }
+
+  unitcombinations <- constructOolsOpt(cost, units, unittable)
+  results <- list()
+  for (i in 1:length(unitcombinations)){
+    if (is.null(attacker)){
+      results[[i]] <- calculateStats(simulateBattles(unitcombinations[[i]], defender, iterations = iterations, replications = replications))
+    }
+    if (is.null(defender)){
+      results[[i]] <- calculateStats(simulateBattles(attacker, unitcombinations[[i]], iterations = iterations, replications = replications))
+    }
+  }
+
+  stop("Calculate optimum")
+
+  stop("Extract overlaps")
+
+  stop("Optimize. Avoid repittions in constructOolsOpt")
+
+  return(results)
+
+}
