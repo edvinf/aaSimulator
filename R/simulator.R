@@ -1,3 +1,25 @@
+#' unit table
+#'
+#' @description
+#'  Table of units for an Axis and Allies version
+#'
+#' @details
+#'  \code{\link[data.table]{data.table}} with the following columns:
+#'  \describe{
+#'   \item{shortcut}{character() short notation for unit, e.g. 'inf' for 'infantry'}
+#'   \item{name}{character() name of unit, e.g. 'infantry}
+#'   \item{cost}{integer() cost of unit}
+#'   \item{baseAttack}{integer() attack value for unit, when no modifiers are applied, NA for units that can not be taken casuality when attacking}
+#'   \item{baseDefence}{integer() defence for unit, when no modifiers are applied, NA for units that can not be taken casualtiy when defending}
+#'   \item{move}{integer() number of moves permissible for unit}
+#'   \item{type}{character() type of unit, modifies which kind of battles they can be involved in (e.g. "Land", "Sea")}
+#'   \item{virtualUnit}{logical() whether precense of units counts towards resolving battle in favour of attacer/defender}
+#'  }
+#'
+#' @name unitTable
+#'
+NULL
+
 #' Results from a battle
 #'
 #' a list with members

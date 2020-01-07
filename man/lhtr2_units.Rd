@@ -9,6 +9,6 @@
 data(lhtr2_units)
 }
 \description{
-Table of units allowed in LHTR 2.0
+Formatted as \code{\link[aaSimulator]{unitTable}}
 }
 \keyword{datasets}
