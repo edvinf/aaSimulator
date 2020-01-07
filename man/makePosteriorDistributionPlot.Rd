@@ -33,7 +33,10 @@ Calculate and plot posterior distribution for battle
 Plotter error bars are the ranges of the reported probabilities across replicates.
 }
 \examples{
- sim <- simulateBattles("30 inf 11 arm 5 ftr arm", "40 inf 3 ftr", iterations = 2000, replications = 3)
+ sim <- simulateBattles("30 inf 11 arm 5 ftr arm",
+        "40 inf 3 ftr",
+        iterations = 2000,
+        replications = 3)
  makePosteriorDistributionPlot(sim, "attacker")
  makePosteriorDistributionPlot(sim, "defender")
 }
