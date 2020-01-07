@@ -7,9 +7,14 @@
 #' @param side character(), side to calculate distribution for, either 'attacker' or 'defender'
 #' @param attackCol color to use when side is 'attacker'
 #' @param defenceCol color to use when side is 'defender'
+#' @param ylim limits for y-axis
 #' @return ggplot object
+#' @examples
+#'  sim <- simulateBattles("30 inf 11 arm 5 ftr arm", "40 inf 3 ftr", iterations = 2000, replications = 3)
+#'  makePosteriorDistributionPlot(sim, "attacker")
+#'  makePosteriorDistributionPlot(sim, "defender")
 #' @export
-makePosteriorDistributionPlot <- function(simulationResults, side="attacker", attackCol="red", defenceCol="blue"){
+makePosteriorDistributionPlot <- function(simulationResults, side="attacker", attackCol="red", defenceCol="blue", ylim=c(0,1)){
   results <- calculatePosteriorDistribution(simulationResults, side)
 
   if (side == "attacker"){
@@ -34,7 +39,7 @@ makePosteriorDistributionPlot <- function(simulationResults, side="attacker", at
   pl <- ggplot2::ggplot(dt, ggplot2::aes(x=order, y=means)) +
     ggplot2::geom_bar(stat="identity", fill=col) +
     ggplot2::geom_errorbar(ggplot2::aes(ymin = min, ymax = max), width=.2) +
-    ggplot2::ylim(c(0,1)) +
+    ggplot2::ylim(ylim) +
     ggplot2::ylab("survival probability") +
     ggplot2::xlab("") +
     ggplot2::scale_x_discrete(labels=dt$unit) +

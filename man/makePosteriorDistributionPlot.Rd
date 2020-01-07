@@ -8,7 +8,8 @@ makePosteriorDistributionPlot(
   simulationResults,
   side = "attacker",
   attackCol = "red",
-  defenceCol = "blue"
+  defenceCol = "blue",
+  ylim = c(0, 1)
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ makePosteriorDistributionPlot(
 \item{attackCol}{color to use when side is 'attacker'}
 
 \item{defenceCol}{color to use when side is 'defender'}
+
+\item{ylim}{limits for y-axis}
 }
 \value{
 ggplot object
@@ -28,4 +31,9 @@ Calculate and plot posterior distribution for battle
 }
 \details{
 Plotter error bars are the ranges of the reported probabilities across replicates.
+}
+\examples{
+ sim <- simulateBattles("30 inf 11 arm 5 ftr arm", "40 inf 3 ftr", iterations = 2000, replications = 3)
+ makePosteriorDistributionPlot(sim, "attacker")
+ makePosteriorDistributionPlot(sim, "defender")
 }
