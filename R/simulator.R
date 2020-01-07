@@ -60,6 +60,55 @@ NULL
 #'
 NULL
 
+#' string format for order of loss specification
+#'
+#' unit codes as for \code{\link[aaSimulator]{ool}}, but organised as a whitespace separated string rather than a vector.
+#'
+#' repeted units may be prefixing units with numbers (and a whitespace to separate unit from number)
+#'
+#' @name prefixedOol
+#'
+NULL
+
+
+#' Expand prefixed OOL
+#' @description
+#'  Expand order of loss specification o. prefixed form.
+#' @param prefixedOol order of loss specification formatted as \code{\link[aaSimulator]{prefixedOol}}
+#' @return order of loss specification formatted as \code{\link[aaSimulator]{ool}}
+#' @export
+expandPrefixedOOL <- function(prefixedOol){
+  s <- strsplit(prefixedOol, split = "\\s+")[[1]]
+  if (length(s)==0){
+    return(c())
+  }
+
+  output <- c()
+  prefix <- NULL
+  for (e in s){
+    if (grepl("^[0-9]", e)){
+      if (!is.null(prefix)){
+        stop(paste("Stop error parsing token", e, "A number may not follow a number in prefixed OOL."))
+      }
+      prefix <- suppressWarnings(as.integer(e))
+      if (is.na(prefix)){
+        stop(paste("Stop error parsing token", e))
+      }
+    } else{
+      if (is.null(prefix)){
+        output <- c(output, e)
+      }
+      if (!is.null(prefix)){
+        for (i in 1:prefix){
+          output <- c(output, e)
+        }
+        prefix <- NULL
+      }
+    }
+  }
+  return(output)
+}
+
 #' Simulate Battles
 #' @description
 #' Simulate Axis and Allies Battles
@@ -68,8 +117,8 @@ NULL
 #' FUN must accept the arguments 'oolAttacker' and 'oolDefender' and a logical argument suppressChecks,
 #' it must return \code{\link[aaSimulator]{battleResults}}
 #'
-#' @param oolAttacker character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}}
-#' @param oolDefender character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}}
+#' @param oolAttacker character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
+#' @param oolDefender character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
 #' @param FUN function for running one battle
 #' @param ... additional arguments passed to FUN
 #' @param iterations number of iterations to simulate for each replication
@@ -77,6 +126,13 @@ NULL
 #' @return \code{\link[aaSimulator]{simulationResults}}
 #' @export
 simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ..., iterations=2000, replications=3){
+
+  if (length(oolAttacker)==1){
+    oolAttacker <- expandPrefixedOOL(oolAttacker)
+  }
+  if (length(oolDefender)==1){
+    oolDefender <- expandPrefixedOOL(oolDefender)
+  }
 
   if (replications < 1){
     stop("Must run at least one replicate.")

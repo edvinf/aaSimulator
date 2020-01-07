@@ -66,3 +66,23 @@ popped <- pop(c("inf", "RET", rep("ftr", 5)), 4, c("ftr"), c("RET"))
 expect_true(popped[1])
 expect_true(popped[7])
 expect_false(any(popped[2:6]))
+
+
+#expand prefixed OOL
+expanded <- expandPrefixedOOL("inf art")
+expect_equal(length(expanded), 2)
+expect_true("inf" %in% expanded)
+expect_true("art" %in% expanded)
+
+expanded <- expandPrefixedOOL("4 inf art")
+expect_equal(length(expanded), 5)
+expect_true("inf" %in% expanded)
+expect_true("art" %in% expanded)
+
+expanded <- expandPrefixedOOL("4 inf 2 art")
+expect_equal(length(expanded), 6)
+expect_true("inf" %in% expanded)
+expect_true("art" %in% expanded)
+
+expect_error(expandPrefixedOOL("4inf 2 art"))
+expect_error(expandPrefixedOOL("4 4 inf 2 art"))

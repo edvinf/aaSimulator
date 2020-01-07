@@ -14,9 +14,9 @@ simulateBattles(
 )
 }
 \arguments{
-\item{oolAttacker}{character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}}}
+\item{oolAttacker}{character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}}
 
-\item{oolDefender}{character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}}}
+\item{oolDefender}{character() vector of unit codes in preferred order of loss, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}}
 
 \item{FUN}{function for running one battle}
 
