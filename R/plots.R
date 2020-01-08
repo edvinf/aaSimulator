@@ -12,8 +12,8 @@
 #' @examples
 #'  sim <- simulateBattles("30 inf 11 arm 5 ftr arm",
 #'         "40 inf 3 ftr",
-#'         iterations = 2000,
-#'         replications = 3)
+#'         iterations = 1000,
+#'         replications = 2)
 #'  makePosteriorDistributionPlot(sim, "attacker")
 #'  makePosteriorDistributionPlot(sim, "defender")
 #' @export
