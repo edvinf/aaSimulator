@@ -6,8 +6,8 @@
 \usage{
 optimizeUnits(
   cost,
-  iterations,
-  replications,
+  iterations = 1000,
+  replications = 3,
   attacker = NULL,
   defender = NULL,
   units = c(),
@@ -25,13 +25,13 @@ optimizeUnits(
 
 \item{defender}{ool for defender, NULL if defending units are to be optimized}
 
-\item{units}{the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}. See @details.}
+\item{units}{the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}.}
 
 \item{unittable}{table of unit properties, formatted as \code{\link[aaSimulator]{unitTable}}}
 }
 \value{
 list containing the optimal unit configurations. That is the unit configuration that are optimal for the given cost on average,
- and all unit configurations where some replicate peforms at least as good as the worst replicate of the optimum.
+ and all unit configurations where some replicate peforms at least as good as the optimum average.
 }
 \description{
 Optimize unit configuration for fixed costs.

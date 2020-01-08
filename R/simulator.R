@@ -409,6 +409,39 @@ constructOolsOpt <- function(cost, units, unittable){
   return(ools)
 }
 
+#' @noRd
+runBattlesOpt <- function(unitcombinations, attacker, defender, iterations, replications){
+  results <- list()
+  for (i in 1:length(unitcombinations)){
+    if (is.null(attacker)){
+      results[[i]] <- calculateStats(simulateBattles(unitcombinations[[i]], defender, iterations = iterations, replications = replications))
+    }
+    if (is.null(defender)){
+      results[[i]] <- calculateStats(simulateBattles(attacker, unitcombinations[[i]], iterations = iterations, replications = replications))
+    }
+  }
+  return(results)
+}
+
+#' @noRd
+getOpt <- function(results, attacker, defender){
+
+  if (is.null(attacker)){
+    maxAttackerWon <- max(unlist(lapply(results, FUN=function(x){x$averages$attackerWon})))
+    optimaAttacker <- unlist(lapply(results, FUN=function(x){any(x$replicates$attackerWon >= maxAttackerWon)}))
+    return(results[optimaAttacker])
+  }
+
+  if (is.null(defender)){
+    maxDefenderWon <- max(unlist(lapply(results, FUN=function(x){x$averages$defenderWon})))
+    optimaDefender <- unlist(lapply(results, FUN=function(x){any(x$replicates$defenderWon >= maxDefenderWon)}))
+    return(results[optimaDefender])
+  }
+
+  stop("Error")
+
+}
+
 #' Optimize units
 #' @description
 #'  Optimize unit configuration for fixed costs.
@@ -424,7 +457,7 @@ constructOolsOpt <- function(cost, units, unittable){
 #' @param units the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}.
 #' @param unittable table of unit properties, formatted as \code{\link[aaSimulator]{unitTable}}
 #' @return list containing the optimal unit configurations. That is the unit configuration that are optimal for the given cost on average,
-#'  and all unit configurations where some replicate peforms at least as good as the worst replicate of the optimum.
+#'  and all unit configurations where some replicate peforms at least as good as the optimum average.
 #' @export
 optimizeUnits <- function(cost, iterations=1000, replications=3, attacker=NULL, defender=NULL, units=c(), unittable=lhtr2_units){
 
@@ -436,23 +469,14 @@ optimizeUnits <- function(cost, iterations=1000, replications=3, attacker=NULL, 
     stop("'Either attacker' or 'defender' must be NULL.")
   }
 
-  unitcombinations <- constructOolsOpt(cost, units, unittable)
-  results <- list()
-  for (i in 1:length(unitcombinations)){
-    if (is.null(attacker)){
-      results[[i]] <- calculateStats(simulateBattles(unitcombinations[[i]], defender, iterations = iterations, replications = replications))
-    }
-    if (is.null(defender)){
-      results[[i]] <- calculateStats(simulateBattles(attacker, unitcombinations[[i]], iterations = iterations, replications = replications))
-    }
+  if (!all(units %in% unittable$shortcut)){
+    invalid <- units[!(units %in% unittable$shortcut)]
+    stop(paste("Invalid units in 'units':", paste(invalid, collapse = ", ")))
   }
 
-  stop("Calculate optimum")
+  unitcombinations <- unique(constructOolsOpt(cost, units, unittable))
+  res <- runBattlesOpt(unitcombinations, attacker, defender, iterations, replications)
 
-  stop("Extract overlaps")
-
-  stop("Optimize. Avoid repittions in constructOolsOpt")
-
-  return(results)
+  return(getOpt(res, attacker, defender))
 
 }
