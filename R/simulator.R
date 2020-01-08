@@ -469,6 +469,22 @@ runBattlesOpt <- function(unitcombinations, attacker, defender, iterations, repl
 }
 
 #' @noRd
+runBattlesOptVerbose <- function(unitcombinations, attacker, defender, iterations, replications){
+  results <- list()
+  for (i in 1:length(unitcombinations)){
+    cat(".")
+    if (is.null(attacker)){
+      results[[i]] <- calculateStats(simulateBattles(unitcombinations[[i]], defender, iterations = iterations, replications = replications))
+    }
+    if (is.null(defender)){
+      results[[i]] <- calculateStats(simulateBattles(attacker, unitcombinations[[i]], iterations = iterations, replications = replications))
+    }
+  }
+  write("", stdout())
+  return(results)
+}
+
+#' @noRd
 getOpt <- function(results, attacker, defender, rank){
 
   if (!(rank %in% c("overlap", "all"))){
@@ -515,9 +531,9 @@ getOpt <- function(results, attacker, defender, rank){
 
 #' Optimize units
 #' @description
-#'  Optimize unit configuration for fixed costs.
+#'  Aproximately optimize unit configuration for fixed costs.
 #' @details
-#'  Runs simulation of for each possible unit configuration, repsecting the order of parameter 'units',
+#'  Runs simulation of for each possible unit configuration, respecting the order of parameter 'units',
 #'  and identifies optimal configurations.
 #'
 #'  The optimal configurations returned are controlled by the parameter 'rank'. If 'rank' is an integer n,
@@ -546,9 +562,11 @@ getOpt <- function(results, attacker, defender, rank){
 #' @param verbose logical() whether to write progress information to stdout
 #' @return list with entries formatted as formatted as \code{\link[aaSimulator]{simulationStats}}, containing stats for the optimal unit configurations. See details.
 #' @examples
-#'  optimizeUnits(30, defender = "8 inf", units=c("inf", "art", "arm"), verbose=T)
+#'  results <- optimizeUnits(12, defender = "2 inf", units=c("inf", "art", "arm"),
+#'                               iterations=100, replications=3, rank="overlap",
+#'                               verbose=TRUE)
 #' @export
-optimizeUnits <- function(cost, iterations=c(10,100,2000), replications=c(20,3,3), rank=c("overlap", 10, "all"), attacker=NULL, defender=NULL, units=c(), unittable=aaSimulator::lhtr2_units, verbose=T){
+optimizeUnits <- function(cost, iterations=c(5,30,100,2000), replications=c(25,10,3,1), rank=c("overlap", "overlap", 10, "all"), attacker=NULL, defender=NULL, units=c(), unittable=aaSimulator::lhtr2_units, verbose=T){
 
   info <- function(text){
     if (verbose){
@@ -578,7 +596,13 @@ optimizeUnits <- function(cost, iterations=c(10,100,2000), replications=c(20,3,3
 
   unitcombinations <- unique(constructOolsOpt(cost, units, unittable))
   info(paste("Running optimisation for", length(unitcombinations), "configurations, with", iterations[1], "iterations and", replications[1], "replications ..."))
-  res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[1], replications[1])
+  if (verbose){
+    res <- runBattlesOptVerbose(unitcombinations, attacker, defender, iterations[1], replications[1])
+  }
+  else{
+    res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[1], replications[1])
+  }
+
   optima <- getOpt(res, attacker, defender, rank[1])
   info(paste("Retaining", length(optima), "optima."))
 
@@ -586,7 +610,12 @@ optimizeUnits <- function(cost, iterations=c(10,100,2000), replications=c(20,3,3
     for (i in 2:length(iterations)){
       unitcombinations <- unique(lapply(optima, FUN=function(x){x$attackerStart}))
       info(paste("Running optimisation for", length(unitcombinations), "configurations, with", iterations[i], "iterations and", replications[i], "replications ..."))
-      res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[i], replications[i])
+      if (verbose){
+        res <- runBattlesOptVerbose(unitcombinations, attacker, defender, iterations[i], replications[i])
+      }
+      else{
+        res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[i], replications[i])
+      }
       optima <- getOpt(res, attacker, defender, rank[i])
       info(paste("Retaining", length(optima), "optima."))
     }

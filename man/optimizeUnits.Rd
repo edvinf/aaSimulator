@@ -6,9 +6,9 @@
 \usage{
 optimizeUnits(
   cost,
-  iterations = c(10, 100, 2000),
-  replications = c(20, 3, 3),
-  rank = c("overlap", 10, "all"),
+  iterations = c(5, 30, 100, 2000),
+  replications = c(25, 10, 3, 1),
+  rank = c("overlap", "overlap", 10, "all"),
   attacker = NULL,
   defender = NULL,
   units = c(),
@@ -39,10 +39,10 @@ optimizeUnits(
 list with entries formatted as formatted as \code{\link[aaSimulator]{simulationStats}}, containing stats for the optimal unit configurations. See details.
 }
 \description{
-Optimize unit configuration for fixed costs.
+Aproximately optimize unit configuration for fixed costs.
 }
 \details{
-Runs simulation of for each possible unit configuration, repsecting the order of parameter 'units',
+Runs simulation of for each possible unit configuration, respecting the order of parameter 'units',
  and identifies optimal configurations.
 
  The optimal configurations returned are controlled by the parameter 'rank'. If 'rank' is an integer n,
@@ -61,5 +61,7 @@ Runs simulation of for each possible unit configuration, repsecting the order of
  are used as the only available unit configurations for subsequent runs.
 }
 \examples{
- optimizeUnits(30, defender = "8 inf", units=c("inf", "art", "arm"), verbose=T)
+ results <- optimizeUnits(12, defender = "2 inf", units=c("inf", "art", "arm"),
+                              iterations=100, replications=3, rank="overlap",
+                              verbose=TRUE)
 }
