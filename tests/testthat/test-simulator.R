@@ -88,6 +88,20 @@ expect_error(expandPrefixedOOL("4inf 2 art"))
 expect_error(expandPrefixedOOL("4 4 inf 2 art"))
 
 
+#collapse OOL
+expanded <- expandPrefixedOOL("inf art")
+collapsed <- collapseOol(expanded)
+expect_equal(collapsed, "1 inf 1 art")
+
+expanded <- c("inf")
+collapsed <- collapseOol(expanded)
+expect_equal(collapsed, "1 inf")
+
+expanded <- c("inf", "inf", "art", "arm")
+collapsed <- collapseOol(expanded)
+expect_equal(collapsed, "2 inf 1 art 1 arm")
+
+
 # optimizeUnits
 res<-optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=10, replications=1, verbose=F)
 expect_false(is.null(res[[1]]$attackerStart))

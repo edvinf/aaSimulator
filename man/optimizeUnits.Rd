@@ -33,7 +33,7 @@ optimizeUnits(
 \item{verbose}{logical() whether to write progress information to stdout}
 }
 \value{
-list containing the optimal unit configurations. See details.
+list with entries formatted as formatted as \code{\link[aaSimulator]{simulationStats}}, containing stats for the optimal unit configurations. See details.
 }
 \description{
 Optimize unit configuration for fixed costs.

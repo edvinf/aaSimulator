@@ -13,5 +13,5 @@ expandPrefixedOOL(prefixedOol)
 order of loss specification formatted as \code{\link[aaSimulator]{ool}}
 }
 \description{
-Expand order of loss specification o. prefixed form.
+Expand order of loss specification from prefixed form.
 }

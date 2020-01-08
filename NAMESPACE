@@ -2,6 +2,7 @@
 
 export(calculatePosteriorDistribution)
 export(calculateStats)
+export(collapseOol)
 export(expandPrefixedOOL)
 export(makePosteriorDistributionPlot)
 export(optimizeUnits)

@@ -95,7 +95,7 @@ NULL
 
 #' Expand prefixed OOL
 #' @description
-#'  Expand order of loss specification o. prefixed form.
+#'  Expand order of loss specification from prefixed form.
 #' @param prefixedOol order of loss specification formatted as \code{\link[aaSimulator]{prefixedOol}}
 #' @return order of loss specification formatted as \code{\link[aaSimulator]{ool}}
 #' @export
@@ -129,6 +129,51 @@ expandPrefixedOOL <- function(prefixedOol){
     }
   }
   return(output)
+}
+
+#' Collapse OOL
+#' @description
+#'  Collapse order of loss specification to prefixed form.
+#' @param ool order of loss specification formatted as \code{\link[aaSimulator]{ool}}
+#' @return order of loss specification formatted as \code{\link[aaSimulator]{prefixedOol}}
+#' @export
+collapseOol <- function(ool){
+
+  if (length(ool) == 0){
+    return("")
+  }
+
+  outstr <- NULL
+  lastunit <- NULL
+  unitcount <- 0
+  for (u in ool){
+    if (is.null(lastunit)){
+      lastunit <- u
+      unitcount <- 1
+    }
+    else if (u == lastunit){
+      unitcount <- unitcount + 1
+    }
+    else{
+      if (is.null(outstr)){
+        outstr <- paste(unitcount, lastunit)
+      }
+      else{
+        outstr <- paste(outstr, unitcount, lastunit)
+      }
+      lastunit <- u
+      unitcount <- 1
+    }
+  }
+
+  if (is.null(outstr)){
+    outstr <- paste(unitcount, lastunit)
+  }
+  else{
+    outstr <- paste(outstr, unitcount, lastunit)
+  }
+
+  return(outstr)
 }
 
 #' Simulate Battles
@@ -465,7 +510,7 @@ getOpt <- function(results, attacker, defender){
 #' @param units the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}. See details.
 #' @param unittable table of unit properties, formatted as \code{\link[aaSimulator]{unitTable}}
 #' @param verbose logical() whether to write progress information to stdout
-#' @return list containing the optimal unit configurations. See details.
+#' @return list with entries formatted as formatted as \code{\link[aaSimulator]{simulationStats}}, containing stats for the optimal unit configurations. See details.
 #' @export
 optimizeUnits <- function(cost, iterations=c(10,100,100), replications=c(10,3,3), attacker=NULL, defender=NULL, units=c(), unittable=lhtr2_units, verbose=T){
 
@@ -501,10 +546,32 @@ optimizeUnits <- function(cost, iterations=c(10,100,100), replications=c(10,3,3)
   if (length(iterations) > 1){
     for (i in 2:length(iterations)){
       unitcombinations <- unique(lapply(optima, FUN=function(x){x$attackerStart}))
-      info(paste("Running optimisation for", length(unitcombinations), "with", iterations[i], "iterations and", replications[i], "replications."))
+      info(paste("Running optimisation for", length(unitcombinations), "configurations, with", iterations[i], "iterations and", replications[i], "replications."))
       res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[i], replications[i])
       optima <- getOpt(res, attacker, defender)
       info(paste("Retaining", length(optima), "optima."))
+    }
+  }
+
+  if (verbose){
+    info("######")
+    if (is.null(attacker)){
+      info(paste("Optimised attack"))
+      info(paste("Defender: ", defender))
+    }
+    if (is.null(defender)){
+      info(paste("Optimised defence"))
+      info(paste("Attacker: ", attack))
+    }
+    info(paste("Optimal unit configurations at cost ", cost, ", using units ", paste(units, collapse=", "), ":"))
+
+    for (r in optima){
+      if (is.null(attacker)){
+        info(paste(collapseOol(r$attackerStart), "(attacker won: ", format(r$averages$attackerWon*100, digits=1), "%)", sep=""))
+      }
+      if (is.null(defender)){
+        info(paste(collapseOol(r$defenderStart), "(defender won: ", format(r$averages$defenderWon*100, digits=1), "%)", sep=""))
+      }
     }
   }
 
