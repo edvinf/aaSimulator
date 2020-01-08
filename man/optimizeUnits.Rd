@@ -6,12 +6,13 @@
 \usage{
 optimizeUnits(
   cost,
-  iterations = c(10, 100, 100),
-  replications = c(10, 3, 3),
+  iterations = c(10, 100, 2000),
+  replications = c(20, 3, 3),
+  rank = c("overlap", 10, "all"),
   attacker = NULL,
   defender = NULL,
   units = c(),
-  unittable = lhtr2_units,
+  unittable = aaSimulator::lhtr2_units,
   verbose = T
 )
 }
@@ -21,6 +22,8 @@ optimizeUnits(
 \item{iterations}{the number of iterations to run for each unit configuration.}
 
 \item{replications}{the number of replicates to run for each unit configuration}
+
+\item{rank}{number of keyword for determining which results to return. See details.}
 
 \item{attacker}{ool for attacker, NULL if attacking units are to be optimized}
 
@@ -40,13 +43,23 @@ Optimize unit configuration for fixed costs.
 }
 \details{
 Runs simulation of for each possible unit configuration, repsecting the order of parameter 'units',
- and identifies optimal configurations. That is the unit configuration that are optimal for the given cost on average,
- and all unit configurations where some replicate peforms at least as good as the optimum average.
+ and identifies optimal configurations.
+
+ The optimal configurations returned are controlled by the parameter 'rank'. If 'rank' is an integer n,
+ n first results will be returned, ordered by average win percentage.
+ 'rank' may also be a keyword which will have the following effects:
+ \describe{
+  \item{'overlap'}{The highest ranking result will be returned, toghether with all results where some replicate peforms at least as good as the optimum average.}
+  \item{'all}{All results will be returned}
+  }
 
  'units' denote order of unit groups, so that units=c("inf", "arm"), will try all combinations
  of "inf" and "arm" allowed by the parameter 'cost', but always with all "inf" preceeding all "arm".
 
- if 'iterations' and 'replications' are vector of equal length, they specify a n iterative optimization,
- where the optimal unit configurations from the first round (optimization with interations[1] and replications[1])
+ if 'iterations', 'replications' and 'rank' are vector of equal length, they specify a n iterative optimization,
+ where the optimal unit configurations from the first round (optimization with interations[1], replications[1], and rank[1])
  are used as the only available unit configurations for subsequent runs.
+}
+\examples{
+ optimizeUnits(30, defender = "8 inf", units=c("inf", "art", "arm"), verbose=T)
 }

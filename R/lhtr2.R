@@ -394,12 +394,12 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
   if (!suppressChecks){
     legalcodes <- aaSimulator::lhtr2_units$shortcut
     if (!all(oolAttacker %in% legalcodes)){
-      illegalCodes <- oolAttacker[!(oolAttacker %in% legalcodes)]
-      stop(paste("Syntax error:", illegalCodes))
+      illegalCodes <- unique(oolAttacker[!(oolAttacker %in% legalcodes)])
+      stop(paste("Syntax error:", paste(illegalCodes, collapse=",")))
     }
     if (!all(oolDefender %in% legalcodes)){
-      illegalCodes <- oolDefender[!(oolDefender %in% legalcodes)]
-      stop(paste("Syntax error:", illegalCodes))
+      illegalCodes <- unique(oolDefender[!(oolDefender %in% legalcodes)])
+      stop(paste("Syntax error:", paste(illegalCodes, collapse=",")))
     }
   }
 

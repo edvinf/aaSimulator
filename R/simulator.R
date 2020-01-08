@@ -469,17 +469,43 @@ runBattlesOpt <- function(unitcombinations, attacker, defender, iterations, repl
 }
 
 #' @noRd
-getOpt <- function(results, attacker, defender){
+getOpt <- function(results, attacker, defender, rank){
+
+  if (!(rank %in% c("overlap", "all"))){
+    i <- suppressWarnings(as.integer(rank))
+    if (is.na(i)){
+      stop("Parameter 'rank' is not an integer or a legal keyword.")
+    }
+  }
 
   if (is.null(attacker)){
-    maxAttackerWon <- max(unlist(lapply(results, FUN=function(x){x$averages$attackerWon})))
-    optimaAttacker <- unlist(lapply(results, FUN=function(x){any(x$replicates$attackerWon >= maxAttackerWon)}))
+    results <- results[order(unlist(lapply(results, FUN=function(x){x$averages$attackerWon})), decreasing = T)]
+    if (rank == "overlap"){
+      maxAttackerWon <- results[[1]]$averages$attackerWon
+      optimaAttacker <- unlist(lapply(results, FUN=function(x){any(x$replicates$attackerWon >= maxAttackerWon)}))
+    }
+    else if (rank == "all"){
+      optimaAttacker <- 1:length(results)
+    }
+    else{
+      optimaAttacker <- 1:min(as.integer(rank), length(results))
+    }
+
     return(results[optimaAttacker])
   }
 
   if (is.null(defender)){
-    maxDefenderWon <- max(unlist(lapply(results, FUN=function(x){x$averages$defenderWon})))
-    optimaDefender <- unlist(lapply(results, FUN=function(x){any(x$replicates$defenderWon >= maxDefenderWon)}))
+    results <- results[order(unlist(lapply(results, FUN=function(x){x$averages$defenderWon})), decreasing = T)]
+    if (rank == "overlap"){
+      maxDefenderWon <- results[[1]]$averages$defenderWon
+      optimaDefender <- unlist(lapply(results, FUN=function(x){any(x$replicates$defenderWon >= maxDefenderWon)}))
+    }
+    else if (rank == "all"){
+      optimaDefender <- 1:length(results)
+    }
+    else{
+      optimaDefender <- 1:min(as.integer(rank), length(results))
+    }
     return(results[optimaDefender])
   }
 
@@ -492,27 +518,37 @@ getOpt <- function(results, attacker, defender){
 #'  Optimize unit configuration for fixed costs.
 #' @details
 #'  Runs simulation of for each possible unit configuration, repsecting the order of parameter 'units',
-#'  and identifies optimal configurations. That is the unit configuration that are optimal for the given cost on average,
-#'  and all unit configurations where some replicate peforms at least as good as the optimum average.
+#'  and identifies optimal configurations.
+#'
+#'  The optimal configurations returned are controlled by the parameter 'rank'. If 'rank' is an integer n,
+#'  n first results will be returned, ordered by average win percentage.
+#'  'rank' may also be a keyword which will have the following effects:
+#'  \describe{
+#'   \item{'overlap'}{The highest ranking result will be returned, toghether with all results where some replicate peforms at least as good as the optimum average.}
+#'   \item{'all}{All results will be returned}
+#'   }
 #'
 #'  'units' denote order of unit groups, so that units=c("inf", "arm"), will try all combinations
 #'  of "inf" and "arm" allowed by the parameter 'cost', but always with all "inf" preceeding all "arm".
 #'
-#'  if 'iterations' and 'replications' are vector of equal length, they specify a n iterative optimization,
-#'  where the optimal unit configurations from the first round (optimization with interations[1] and replications[1])
+#'  if 'iterations', 'replications' and 'rank' are vector of equal length, they specify a n iterative optimization,
+#'  where the optimal unit configurations from the first round (optimization with interations[1], replications[1], and rank[1])
 #'  are used as the only available unit configurations for subsequent runs.
 #'
 #' @param cost The cost to optimize for, unit configurations must not exceed this cost
 #' @param iterations the number of iterations to run for each unit configuration.
 #' @param replications the number of replicates to run for each unit configuration
+#' @param rank number of keyword for determining which results to return. See details.
 #' @param attacker ool for attacker, NULL if attacking units are to be optimized
 #' @param defender ool for defender, NULL if defending units are to be optimized
 #' @param units the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}. See details.
 #' @param unittable table of unit properties, formatted as \code{\link[aaSimulator]{unitTable}}
 #' @param verbose logical() whether to write progress information to stdout
 #' @return list with entries formatted as formatted as \code{\link[aaSimulator]{simulationStats}}, containing stats for the optimal unit configurations. See details.
+#' @examples
+#'  optimizeUnits(30, defender = "8 inf", units=c("inf", "art", "arm"), verbose=T)
 #' @export
-optimizeUnits <- function(cost, iterations=c(10,100,100), replications=c(10,3,3), attacker=NULL, defender=NULL, units=c(), unittable=lhtr2_units, verbose=T){
+optimizeUnits <- function(cost, iterations=c(10,100,2000), replications=c(20,3,3), rank=c("overlap", 10, "all"), attacker=NULL, defender=NULL, units=c(), unittable=aaSimulator::lhtr2_units, verbose=T){
 
   info <- function(text){
     if (verbose){
@@ -536,19 +572,22 @@ optimizeUnits <- function(cost, iterations=c(10,100,100), replications=c(10,3,3)
   if (length(iterations) != length(replications)){
     stop("Length of the vector 'iterations' and the vector 'replications' must match")
   }
+  if (length(iterations) != length(rank)){
+    stop("Length of the vector 'iterations' and the vector 'rank' must match")
+  }
 
   unitcombinations <- unique(constructOolsOpt(cost, units, unittable))
-  info(paste("Running optimisation for", length(unitcombinations), "configurations, with", iterations[1], "iterations and", replications[1], "replications."))
+  info(paste("Running optimisation for", length(unitcombinations), "configurations, with", iterations[1], "iterations and", replications[1], "replications ..."))
   res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[1], replications[1])
-  optima <- getOpt(res, attacker, defender)
+  optima <- getOpt(res, attacker, defender, rank[1])
   info(paste("Retaining", length(optima), "optima."))
 
   if (length(iterations) > 1){
     for (i in 2:length(iterations)){
       unitcombinations <- unique(lapply(optima, FUN=function(x){x$attackerStart}))
-      info(paste("Running optimisation for", length(unitcombinations), "configurations, with", iterations[i], "iterations and", replications[i], "replications."))
+      info(paste("Running optimisation for", length(unitcombinations), "configurations, with", iterations[i], "iterations and", replications[i], "replications ..."))
       res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[i], replications[i])
-      optima <- getOpt(res, attacker, defender)
+      optima <- getOpt(res, attacker, defender, rank[i])
       info(paste("Retaining", length(optima), "optima."))
     }
   }
@@ -567,10 +606,10 @@ optimizeUnits <- function(cost, iterations=c(10,100,100), replications=c(10,3,3)
 
     for (r in optima){
       if (is.null(attacker)){
-        info(paste(collapseOol(r$attackerStart), "(attacker won: ", format(r$averages$attackerWon*100, digits=1), "%)", sep=""))
+        info(paste(collapseOol(r$attackerStart), " (attacker won: ", format(r$averages$attackerWon*100, digits=1), "%)", sep=""))
       }
       if (is.null(defender)){
-        info(paste(collapseOol(r$defenderStart), "(defender won: ", format(r$averages$defenderWon*100, digits=1), "%)", sep=""))
+        info(paste(collapseOol(r$defenderStart), " (defender won: ", format(r$averages$defenderWon*100, digits=1), "%)", sep=""))
       }
     }
   }

@@ -103,19 +103,20 @@ expect_equal(collapsed, "2 inf 1 art 1 arm")
 
 
 # optimizeUnits
-res<-optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=10, replications=1, verbose=F)
+res<-optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=10, replications=1, rank="overlap", verbose=F)
 expect_false(is.null(res[[1]]$attackerStart))
 expect_false(is.null(res[[1]]$defenderStart))
 expect_false(is.null(res[[1]]$replicates))
 expect_false(is.null(res[[1]]$averages))
 
-res<-optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), verbose=F)
+res<-optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), rank=c("overlap",1), verbose=F)
 expect_false(is.null(res[[1]]$attackerStart))
 expect_false(is.null(res[[1]]$defenderStart))
 expect_false(is.null(res[[1]]$replicates))
 expect_false(is.null(res[[1]]$averages))
 
-expect_error(optimizeUnits(6, defender = "2 inf", units=c("2 inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), verbose=F))
-expect_error(optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2, 3), verbose=F))
-expect_error(optimizeUnits(6, attacker= "2 inf", defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), verbose=F))
-expect_error(optimizeUnits(6, units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), verbose=F))
+expect_error(optimizeUnits(6, defender = "2 inf", units=c("2 inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), rank=c("overlap",1), verbose=F))
+expect_error(optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2, 3), rank=c("overlap",1), verbose=F))
+expect_error(optimizeUnits(6, attacker= "2 inf", defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), rank=c("overlap",1), replications=c(1, 2), verbose=F))
+expect_error(optimizeUnits(6, units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), rank=c("overlap",1), verbose=F))
+expect_error(optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), rank="overlap", verbose=F))
