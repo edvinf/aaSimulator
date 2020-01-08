@@ -446,20 +446,34 @@ getOpt <- function(results, attacker, defender){
 #' @description
 #'  Optimize unit configuration for fixed costs.
 #' @details
+#'  Runs simulation of for each possible unit configuration, repsecting the order of parameter 'units',
+#'  and identifies optimal configurations. That is the unit configuration that are optimal for the given cost on average,
+#'  and all unit configurations where some replicate peforms at least as good as the optimum average.
+#'
 #'  'units' denote order of unit groups, so that units=c("inf", "arm"), will try all combinations
 #'  of "inf" and "arm" allowed by the parameter 'cost', but always with all "inf" preceeding all "arm".
 #'
+#'  if 'iterations' and 'replications' are vector of equal length, they specify a n iterative optimization,
+#'  where the optimal unit configurations from the first round (optimization with interations[1] and replications[1])
+#'  are used as the only available unit configurations for subsequent runs.
+#'
 #' @param cost The cost to optimize for, unit configurations must not exceed this cost
-#' @param iterations the number of iterations to run for each unit configuration
+#' @param iterations the number of iterations to run for each unit configuration.
 #' @param replications the number of replicates to run for each unit configuration
 #' @param attacker ool for attacker, NULL if attacking units are to be optimized
 #' @param defender ool for defender, NULL if defending units are to be optimized
-#' @param units the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}.
+#' @param units the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}. See details.
 #' @param unittable table of unit properties, formatted as \code{\link[aaSimulator]{unitTable}}
-#' @return list containing the optimal unit configurations. That is the unit configuration that are optimal for the given cost on average,
-#'  and all unit configurations where some replicate peforms at least as good as the optimum average.
+#' @param verbose logical() whether to write progress information to stdout
+#' @return list containing the optimal unit configurations. See details.
 #' @export
-optimizeUnits <- function(cost, iterations=1000, replications=3, attacker=NULL, defender=NULL, units=c(), unittable=lhtr2_units){
+optimizeUnits <- function(cost, iterations=c(10,100,100), replications=c(10,3,3), attacker=NULL, defender=NULL, units=c(), unittable=lhtr2_units, verbose=T){
+
+  info <- function(text){
+    if (verbose){
+      write(text, stdout())
+    }
+  }
 
   if (is.null(attacker) && is.null(defender)){
     stop("'attacker' and 'defender' may not both be NULL.")
@@ -474,9 +488,26 @@ optimizeUnits <- function(cost, iterations=1000, replications=3, attacker=NULL, 
     stop(paste("Invalid units in 'units':", paste(invalid, collapse = ", ")))
   }
 
-  unitcombinations <- unique(constructOolsOpt(cost, units, unittable))
-  res <- runBattlesOpt(unitcombinations, attacker, defender, iterations, replications)
+  if (length(iterations) != length(replications)){
+    stop("Length of the vector 'iterations' and the vector 'replications' must match")
+  }
 
-  return(getOpt(res, attacker, defender))
+  unitcombinations <- unique(constructOolsOpt(cost, units, unittable))
+  info(paste("Running optimisation for", length(unitcombinations), "configurations, with", iterations[1], "iterations and", replications[1], "replications."))
+  res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[1], replications[1])
+  optima <- getOpt(res, attacker, defender)
+  info(paste("Retaining", length(optima), "optima."))
+
+  if (length(iterations) > 1){
+    for (i in 2:length(iterations)){
+      unitcombinations <- unique(lapply(optima, FUN=function(x){x$attackerStart}))
+      info(paste("Running optimisation for", length(unitcombinations), "with", iterations[i], "iterations and", replications[i], "replications."))
+      res <- runBattlesOpt(unitcombinations, attacker, defender, iterations[i], replications[i])
+      optima <- getOpt(res, attacker, defender)
+      info(paste("Retaining", length(optima), "optima."))
+    }
+  }
+
+  return(optima)
 
 }

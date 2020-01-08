@@ -6,18 +6,19 @@
 \usage{
 optimizeUnits(
   cost,
-  iterations = 1000,
-  replications = 3,
+  iterations = c(10, 100, 100),
+  replications = c(10, 3, 3),
   attacker = NULL,
   defender = NULL,
   units = c(),
-  unittable = lhtr2_units
+  unittable = lhtr2_units,
+  verbose = T
 )
 }
 \arguments{
 \item{cost}{The cost to optimize for, unit configurations must not exceed this cost}
 
-\item{iterations}{the number of iterations to run for each unit configuration}
+\item{iterations}{the number of iterations to run for each unit configuration.}
 
 \item{replications}{the number of replicates to run for each unit configuration}
 
@@ -25,18 +26,27 @@ optimizeUnits(
 
 \item{defender}{ool for defender, NULL if defending units are to be optimized}
 
-\item{units}{the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}.}
+\item{units}{the units in order of loss that should be sampled for optimization, formatted as \code{\link[aaSimulator]{ool}}. See details.}
 
 \item{unittable}{table of unit properties, formatted as \code{\link[aaSimulator]{unitTable}}}
+
+\item{verbose}{logical() whether to write progress information to stdout}
 }
 \value{
-list containing the optimal unit configurations. That is the unit configuration that are optimal for the given cost on average,
- and all unit configurations where some replicate peforms at least as good as the optimum average.
+list containing the optimal unit configurations. See details.
 }
 \description{
 Optimize unit configuration for fixed costs.
 }
 \details{
-'units' denote order of unit groups, so that units=c("inf", "arm"), will try all combinations
+Runs simulation of for each possible unit configuration, repsecting the order of parameter 'units',
+ and identifies optimal configurations. That is the unit configuration that are optimal for the given cost on average,
+ and all unit configurations where some replicate peforms at least as good as the optimum average.
+
+ 'units' denote order of unit groups, so that units=c("inf", "arm"), will try all combinations
  of "inf" and "arm" allowed by the parameter 'cost', but always with all "inf" preceeding all "arm".
+
+ if 'iterations' and 'replications' are vector of equal length, they specify a n iterative optimization,
+ where the optimal unit configurations from the first round (optimization with interations[1] and replications[1])
+ are used as the only available unit configurations for subsequent runs.
 }
