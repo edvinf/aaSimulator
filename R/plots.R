@@ -89,13 +89,13 @@ makeCostDiffPlot <- function(simulationResults, attackCol="red", defenceCol="blu
 
   dt <- data.table::data.table(gain=gains, prob=probs, side=side, replicate=replicate)
 
-  pl <- ggplot2::ggplot(dt, aes(x=gain, y=prob, color=side, linetype=replicate)) +
-    geom_line() +
-    scale_discrete_manual("color", values=c("attacker"=attackCol, "defender"=defenceCol)) +
-    ylab("P(g<G)") +
-    xlab("gain (G)") +
-    ggtitle("Gain (cost - opponent cost)")
-    theme_minimal()
+  pl <- ggplot2::ggplot(dt, ggplot2::aes(x=gain, y=prob, color=side, linetype=replicate)) +
+    ggplot2::geom_line() +
+    ggplot2::scale_discrete_manual("color", values=c("attacker"=attackCol, "defender"=defenceCol)) +
+    ggplot2::ylab("P(g<G)") +
+    ggplot2::xlab("gain (G)") +
+    ggplot2::ggtitle("Gain (cost - opponent cost)") +
+    ggplot2::theme_minimal()
 
   return(pl)
 }
@@ -120,9 +120,9 @@ makeBattleStatPlot <- function(simulationResults){
                                 "mean rounds",
                                 "mean cost attacker",
                                 "mean cost defender"),
-                         value=c(paste(format(stats$averages$attackerWon*100, digits=1)),
-                                 paste(format(stats$averages$defenderWon*100, digits=1)),
-                                 paste(format(stats$averages$draw*100, digits=1)),
+                         value=c(paste(format(stats$averages$attackerWon*100, digits=1), "%"),
+                                 paste(format(stats$averages$defenderWon*100, digits=1), "%"),
+                                 paste(format(stats$averages$draw*100, digits=1), "%"),
                                  paste(format(stats$averages$meanRounds, digits=1)),
                                  paste(format(stats$averages$meanAttackerCost, digits=1)),
                                  paste(format(stats$averages$meanDefenderCost, digits=1))))
@@ -139,9 +139,9 @@ makeBattleStatPlot <- function(simulationResults){
 #' @export
 plotBattleSummary <- function(simulationResults){
 
-  p1 <- makePosteriorDistributionPlot(simulationResults, "attacker") + ggtitle("")
+  p1 <- makePosteriorDistributionPlot(simulationResults, "attacker") + ggplot2::ggtitle("")
   stats <- makeBattleStatPlot(simulationResults)
-  p2 <- makePosteriorDistributionPlot(simulationResults, "defender") + ggtitle("")
+  p2 <- makePosteriorDistributionPlot(simulationResults, "defender") + ggplot2::ggtitle("")
   costdiff <- makeCostDiffPlot(simulationResults)
 
   gridExtra::grid.arrange(p1, stats,
