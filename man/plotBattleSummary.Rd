@@ -12,3 +12,10 @@ plotBattleSummary(simulationResults)
 \description{
 Produces a panneled plot summarizing results of a battle simulation
 }
+\examples{
+ sim <- simulateBattles("30 inf 11 arm 5 ftr arm",
+        "40 inf 3 ftr",
+        iterations = 1000,
+        replications = 2)
+ plotBattleSummary(sim)
+}
