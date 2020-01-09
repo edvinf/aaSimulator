@@ -52,8 +52,8 @@ makePosteriorDistributionPlot <- function(simulationResults, side="attacker", at
   return(pl)
 }
 
-#' Make plot of gains
-#' @description Plots the cumulative probabilities of gains (cost - opponent cost) for a battle simulation
+#' Make plot of costs
+#' @description Plots the cumulative probabilities of costs for a battle simulation
 #' @param simulationResults, formatted as: \code{\link[aaSimulator]{simulationResults}}
 #' @param attackCol color to use when side is 'attacker'
 #' @param defenceCol color to use when side is 'defender'
@@ -67,34 +67,33 @@ makePosteriorDistributionPlot <- function(simulationResults, side="attacker", at
 #' @export
 makeCostDiffPlot <- function(simulationResults, attackCol="red", defenceCol="blue"){
   costDiffs <- lapply(simulationResults$replicates, FUN=function(x){unlist(lapply(x, function(y){y$attackerCost - y$defenderCost}))})
-  gains <- c()
+  costs <- c()
   probs <- c()
   side <- c()
   replicate <- c()
   for (i in 1:length(simulationResults$replicates)){
-    gain <- unlist(lapply(simulationResults$replicates[[i]], function(y){y$attackerCost - y$defenderCost}))
-    prob <- rank(gain) / length(gain)
-    gains <- c(gains, gain)
+    cost <- unlist(lapply(simulationResults$replicates[[i]], function(y){y$attackerCost}))
+    prob <- (max(rank(cost)) - rank(cost)) / max(rank(cost))
+    costs <- c(costs, cost)
     probs <- c(probs, prob)
-    side <- c(side, rep("attacker", length(gain)))
-    replicate <- c(replicate, rep(paste("#", i), length(gain)))
+    side <- c(side, rep("attacker", length(cost)))
+    replicate <- c(replicate, rep(paste("#", i), length(cost)))
 
-    gain <- unlist(lapply(simulationResults$replicates[[i]], function(y){y$defenderCost - y$attackerCost}))
-    prob <- rank(gain) / length(gain)
-    gains <- c(gains, gain)
+    cost <- unlist(lapply(simulationResults$replicates[[i]], function(y){y$defenderCost}))
+    prob <- (max(rank(cost)) - rank(cost)) / max(rank(cost))
+    costs <- c(costs, cost)
     probs <- c(probs, prob)
-    side <- c(side, rep("defender", length(gain)))
-    replicate <- c(replicate, rep(paste("#", i), length(gain)))
+    side <- c(side, rep("defender", length(cost)))
+    replicate <- c(replicate, rep(paste("#", i), length(cost)))
   }
 
-  dt <- data.table::data.table(gain=gains, prob=probs, side=side, replicate=replicate)
+  dt <- data.table::data.table(cost=costs, prob=probs, side=side, replicate=replicate)
 
-  pl <- ggplot2::ggplot(dt, ggplot2::aes(x=gain, y=prob, color=side, linetype=replicate)) +
+  pl <- ggplot2::ggplot(dt, ggplot2::aes(x=cost, y=prob, color=side, linetype=replicate)) +
     ggplot2::geom_line() +
     ggplot2::scale_discrete_manual("color", values=c("attacker"=attackCol, "defender"=defenceCol)) +
-    ggplot2::ylab("P(g<G)") +
-    ggplot2::xlab("gain (G)") +
-    ggplot2::ggtitle("Gain (cost - opponent cost)") +
+    ggplot2::ylab("P(c>=C)") +
+    ggplot2::xlab("cost (C)") +
     ggplot2::theme_minimal()
 
   return(pl)
