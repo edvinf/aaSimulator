@@ -6,8 +6,8 @@
 \description{
 a list with members
 \describe{
- \item{unitsAttacker}{character() vector with the remaining units for attacker.}
- \item{unitsDefender}{character() vector with the remaining units for defender.}
+ \item{unitsAttacker}{character() vector with the remaining units for attacker. Should not contain virtual units.}
+ \item{unitsDefender}{character() vector with the remaining units for defender. Should not contain virtual units.}
  \item{rounds}{integer() the number of rounds in the battler}
  \item{attackerCost}{numeric() The cost of units lost for attacker}
  \item{defenderCost}{numeric() The cost of units lost for defender}

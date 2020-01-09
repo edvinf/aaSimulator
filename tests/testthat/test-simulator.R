@@ -120,3 +120,4 @@ expect_error(optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), 
 expect_error(optimizeUnits(6, attacker= "2 inf", defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), rank=c("overlap",1), replications=c(1, 2), verbose=F))
 expect_error(optimizeUnits(6, units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), rank=c("overlap",1), verbose=F))
 expect_error(optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), rank="overlap", verbose=F))
+

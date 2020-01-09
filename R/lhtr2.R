@@ -388,6 +388,8 @@ calculateCost <- function(ool, remaining, unitlist=aaSimulator::lhtr2_units){
 #'  \item{unitsAttacker}{remaining units for attacker, formatted as oolAttacker}
 #'  \item{unitsDefender}{remaining units for defender, formatted as oolDefender}
 #'  }
+#' @examples
+#'  play_LHTR_battle(c("inf", "art", "ftr"), c("inf", "inf", "inf", "AA"))
 #' @export
 play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, suppressChecks=F){
 
@@ -514,6 +516,8 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
 
   result$defenderLoss <- NULL
   result$attackerLoss <- NULL
+  result$unitsAttacker <- result$unitsAttacker[result$unitsAttacker %in% nonvirtualunits]
+  result$unitsDefender <- result$unitsDefender[result$unitsDefender %in% nonvirtualunits]
   result$attackerCost <- calculateCost(oolAttacker, result$unitsAttacker, unitlist)
   result$defenderCost <- calculateCost(oolDefender, result$unitsDefender, unitlist)
   result$ret <- NULL

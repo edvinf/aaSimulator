@@ -14,6 +14,8 @@ plot(pl)
 pl <- makePosteriorDistributionPlot(s, "defender")
 plot(pl)
 
-sim <- simulateBattles("30 inf 11 arm 5 ftr arm", "40 inf 3 ftr", iterations = 1000, replications = 2)
+sim <- simulateBattles("30 inf 11 arm 5 ftr arm", "40 inf 3 ftr AA", iterations = 1000, replications = 2)
 plotBattleSummary(sim)
-stop("Address AA gun issue (attacker won % 0")
+
+sim <- simulateBattles("30 inf 11 arm 5 ftr arm", "40 inf 3 ftr AA", iterations = 100, replications = 5)
+plotBattleSummary(sim)

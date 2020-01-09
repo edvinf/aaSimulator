@@ -59,3 +59,6 @@ units for oolAttacker and oolDefender accepts all units specified in \code{\link
  To simulate units flying over territories with AA-guns en-route to battle, this must be modelled as a separate battle.
  Battle termination conditions are check _after_ each round of battle, so it is possible ot set up a simulation of only aircrafts vs AA.
 }
+\examples{
+ play_LHTR_battle(c("inf", "art", "ftr"), c("inf", "inf", "inf", "AA"))
+}
