@@ -1,3 +1,4 @@
+context("play_LHTR_battle")
 s<-play_LHTR_battle(c("inf"), c("inf"))
 expect_false(is.null(s$unitsAttacker))
 expect_false(is.null(s$unitsDefender))
@@ -36,3 +37,7 @@ expect_equal(cost, 0)
 cost <- calculateCost(c("AA", "inf"), c())
 expect_equal(cost, 3)
 
+# RET flag
+result <- play_LHTR_battle(expandPrefixedOOL("inf RET 100 inf"), expandPrefixedOOL("100 inf"))
+expect_lte(result$rounds, 1)
+expect_error(play_LHTR_battle(expandPrefixedOOL("100 inf"), expandPrefixedOOL("inf RET 100 inf")))

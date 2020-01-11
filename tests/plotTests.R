@@ -19,3 +19,6 @@ plotBattleSummary(sim)
 
 sim <- simulateBattles("30 inf 11 arm 5 ftr arm", "40 inf 3 ftr AA", iterations = 100, replications = 5)
 plotBattleSummary(sim)
+
+sim <- simulateBattles("30 inf RET 11 arm 5 ftr arm", "40 inf 3 ftr AA", iterations = 100, replications = 5)
+plotBattleSummary(sim)

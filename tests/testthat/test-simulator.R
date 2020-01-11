@@ -1,3 +1,4 @@
+context("simulateBattles")
 #
 # Test simulate battles
 #
@@ -25,6 +26,7 @@ expect_false(is.na(s$replicates[[1]][[1]]$attackerCost))
 #
 # Test stats calc
 #
+context("calculateStats")
 s <- simulateBattles(c("inf", "art", "arm"), c("inf", "inf", "inf"), iterations = 20, replications = 3)
 stats <- calculateStats(s)
 expect_false(is.null(stats$attackerStart))
@@ -52,7 +54,7 @@ expect_error(calculatePosteriorDistribution(s, "otherside"))
 #
 # Test pop
 #
-
+context("pop (internal function")
 popped <- pop(rep("ftr", 5), 4, c("ftr"))
 expect_equal(sum(popped), 1)
 expect_equal(rep("ftr", 5)[popped][1], "ftr")
@@ -69,6 +71,7 @@ expect_false(any(popped[2:6]))
 
 
 #expand prefixed OOL
+context("expandPrefixedOOL")
 expanded <- expandPrefixedOOL("inf art")
 expect_equal(length(expanded), 2)
 expect_true("inf" %in% expanded)
@@ -88,6 +91,7 @@ expect_error(expandPrefixedOOL("4inf 2 art"))
 expect_error(expandPrefixedOOL("4 4 inf 2 art"))
 
 
+context("collapseOol")
 #collapse OOL
 expanded <- expandPrefixedOOL("inf art")
 collapsed <- collapseOol(expanded)
@@ -103,6 +107,7 @@ expect_equal(collapsed, "2 inf 1 art 1 arm")
 
 
 # optimizeUnits
+context("optimizeUnits")
 res<-optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=10, replications=1, rank="overlap", verbose=F)
 expect_false(is.null(res[[1]]$attackerStart))
 expect_false(is.null(res[[1]]$defenderStart))

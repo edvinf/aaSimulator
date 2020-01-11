@@ -426,6 +426,10 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
       stop("Defender OOL may not contain unit DBomb (offshore bombardment)")
     }
 
+    if ("RET" %in% oolDefender){
+      stop("Defender OOL may not contain control directive RET (retreat)")
+    }
+
     if ("AA" %in% oolAttacker){
       stop("Attacker OOL may not contain unit aa (Anti-aircraft Gun)")
     }
