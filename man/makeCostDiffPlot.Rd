@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{makeCostDiffPlot}
 \alias{makeCostDiffPlot}
-\title{Make plot of gains}
+\title{Make plot of costs}
 \usage{
 makeCostDiffPlot(simulationResults, attackCol = "red", defenceCol = "blue")
 }
@@ -17,7 +17,7 @@ makeCostDiffPlot(simulationResults, attackCol = "red", defenceCol = "blue")
 ggplot object
 }
 \description{
-Plots the cumulative probabilities of gains (cost - opponent cost) for a battle simulation
+Plots the cumulative probabilities of costs for a battle simulation
 }
 \examples{
  sim <- simulateBattles("30 inf 11 arm 5 ftr arm",
