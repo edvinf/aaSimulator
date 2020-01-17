@@ -47,8 +47,14 @@ result <- play_LHTR_battle(expandPrefixedOOL("sub SUBM 99 sub"), expandPrefixedO
 expect_lte(result$rounds, 1)
 result <- play_LHTR_battle(expandPrefixedOOL("100 sub"), expandPrefixedOOL("SUBM 100 sub"))
 expect_lte(result$rounds, 1)
+result <- play_LHTR_battle(expandPrefixedOOL("100 sub"), expandPrefixedOOL("SUBM 100 ssub"))
+expect_lte(result$rounds, 1)
+
+
 
 result <- play_LHTR_battle(expandPrefixedOOL("SUBM 10 sub"), expandPrefixedOOL("15 trn dd"))
+expect_true(length(result$unitsDefender) == 0 | length(result$unitsAttacker) == 0 )
+result <- play_LHTR_battle(expandPrefixedOOL("SUBM 10 ssub"), expandPrefixedOOL("15 trn dd"))
 expect_true(length(result$unitsDefender) == 0 | length(result$unitsAttacker) == 0 )
 
 result <- play_LHTR_battle(expandPrefixedOOL("10 sub dd"), expandPrefixedOOL("SUBM 15 sub"))
