@@ -57,6 +57,7 @@ makePosteriorDistributionPlot <- function(simulationResults, side="attacker", at
 #' @param simulationResults, formatted as: \code{\link[aaSimulator]{simulationResults}}
 #' @param attackCol color to use when side is 'attacker'
 #' @param defenceCol color to use when side is 'defender'
+#' @param legend logical() whether to add a legend to the plot
 #' @return ggplot object
 #' @examples
 #'  sim <- simulateBattles("30 inf 11 arm 5 ftr arm",
@@ -91,13 +92,15 @@ makeCostDiffPlot <- function(simulationResults, attackCol="red", defenceCol="blu
 
   pl <- ggplot2::ggplot(dt, ggplot2::aes(x=cost, y=prob, color=side, linetype=replicate)) +
     ggplot2::geom_line() +
-    ggplot2::scale_discrete_manual("color", values=c("attacker"=attackCol, "defender"=defenceCol), guide=legend) +
     ggplot2::ylab("P(c \u2265 C)") +
     ggplot2::xlab("cost (C)") +
     ggplot2::theme_minimal()
 
   if (!legend){
-    pl <- pl + ggplot2::guides(linetype=F)
+    pl <- pl + ggplot2::guides(linetype=F) + ggplot2::scale_discrete_manual("color", values=c("attacker"=attackCol, "defender"=defenceCol), guide=F)
+  }
+  else{
+    pl <- pl + ggplot2::scale_discrete_manual("color", values=c("attacker"=attackCol, "defender"=defenceCol))
   }
 
   return(pl)

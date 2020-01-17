@@ -17,6 +17,8 @@ makeCostDiffPlot(
 \item{attackCol}{color to use when side is 'attacker'}
 
 \item{defenceCol}{color to use when side is 'defender'}
+
+\item{legend}{logical() whether to add a legend to the plot}
 }
 \value{
 ggplot object
