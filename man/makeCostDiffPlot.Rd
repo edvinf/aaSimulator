@@ -4,7 +4,12 @@
 \alias{makeCostDiffPlot}
 \title{Make plot of costs}
 \usage{
-makeCostDiffPlot(simulationResults, attackCol = "red", defenceCol = "blue")
+makeCostDiffPlot(
+  simulationResults,
+  attackCol = "red",
+  defenceCol = "blue",
+  legend = T
+)
 }
 \arguments{
 \item{simulationResults, }{formatted as: \code{\link[aaSimulator]{simulationResults}}}

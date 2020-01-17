@@ -43,7 +43,7 @@ makePosteriorDistributionPlot <- function(simulationResults, side="attacker", at
     ggplot2::geom_bar(stat="identity", fill=col) +
     ggplot2::geom_errorbar(ggplot2::aes(ymin = min, ymax = max), width=.2) +
     ggplot2::ylim(ylim) +
-    ggplot2::ylab("survival probability") +
+    ggplot2::ylab("survival prob.") +
     ggplot2::xlab("") +
     ggplot2::scale_x_discrete(labels=dt$unit) +
     ggplot2::ggtitle(paste(length(simulationResults$replicates[[1]]), "iterations,", length(simulationResults$replicates), "replicates.")) +
@@ -65,7 +65,7 @@ makePosteriorDistributionPlot <- function(simulationResults, side="attacker", at
 #'         replications = 2)
 #'  makeCostDiffPlot(sim)
 #' @export
-makeCostDiffPlot <- function(simulationResults, attackCol="red", defenceCol="blue"){
+makeCostDiffPlot <- function(simulationResults, attackCol="red", defenceCol="blue", legend=T){
   costDiffs <- lapply(simulationResults$replicates, FUN=function(x){unlist(lapply(x, function(y){y$attackerCost - y$defenderCost}))})
   costs <- c()
   probs <- c()
@@ -91,10 +91,14 @@ makeCostDiffPlot <- function(simulationResults, attackCol="red", defenceCol="blu
 
   pl <- ggplot2::ggplot(dt, ggplot2::aes(x=cost, y=prob, color=side, linetype=replicate)) +
     ggplot2::geom_line() +
-    ggplot2::scale_discrete_manual("color", values=c("attacker"=attackCol, "defender"=defenceCol)) +
-    ggplot2::ylab("P(c>=C)") +
+    ggplot2::scale_discrete_manual("color", values=c("attacker"=attackCol, "defender"=defenceCol), guide=legend) +
+    ggplot2::ylab("P(c \u2265 C)") +
     ggplot2::xlab("cost (C)") +
     ggplot2::theme_minimal()
+
+  if (!legend){
+    pl <- pl + ggplot2::guides(linetype=F)
+  }
 
   return(pl)
 }
@@ -114,8 +118,8 @@ makeCostDiffPlot <- function(simulationResults, attackCol="red", defenceCol="blu
 makeBattleStatPlot <- function(simulationResults){
   stats <- calculateStats(simulationResults)
   tab <- data.table::data.table(stat=c("attacker won",
-                                "defender won",
-                                "draw",
+                                "defender survived",
+                                "neither survived",
                                 "mean rounds",
                                 "mean cost attacker",
                                 "mean cost defender"),
@@ -144,10 +148,10 @@ makeBattleStatPlot <- function(simulationResults){
 #' @export
 plotBattleSummary <- function(simulationResults){
 
-  p1 <- makePosteriorDistributionPlot(simulationResults, "attacker") + ggplot2::ggtitle("")
+  p1 <- makePosteriorDistributionPlot(simulationResults, "attacker") + ggplot2::ggtitle("attacker")
   stats <- makeBattleStatPlot(simulationResults)
-  p2 <- makePosteriorDistributionPlot(simulationResults, "defender") + ggplot2::ggtitle("")
-  costdiff <- makeCostDiffPlot(simulationResults)
+  p2 <- makePosteriorDistributionPlot(simulationResults, "defender") + ggplot2::ggtitle("defender")
+  costdiff <- makeCostDiffPlot(simulationResults, legend=F) + ggplot2::ggtitle("")
 
   gridExtra::grid.arrange(p1, stats,
                           p2, costdiff,
