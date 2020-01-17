@@ -136,8 +136,11 @@ defend <- function(units, unitlist=aaSimulator::lhtr2_units){
 #' @noRd
 #' @keywords internal
 play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAttack=F, submergeDefend=F, verbose=F, unitlist=aaSimulator::lhtr2_units){
+
   result <- list()
   result$ret <- F
+  result$submAttack <- submergeAttack
+  result$submDefend <- submergeDefend
   result$attackerLoss <- c()
   result$defenderLoss <- c()
   result$unitsAttacker <- oolAttacker
@@ -156,7 +159,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
         result$ret <<- T
       }
       if ("SUBM" %in% result$attackerLoss){
-        stop("SUBM not implemented")
+        result$submAttack <<- T
       }
     }
     else if (side == "defender"){
@@ -165,7 +168,7 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
       result$unitsDefender <<- result$unitsDefender[mask]
 
       if ("SUBM" %in% result$defenderLoss){
-        stop("SUBM not implemented")
+        result$submDefend <<- T
       }
 
     }
@@ -324,16 +327,16 @@ play_LHTR_battle_round <- function(oolAttacker, oolDefender, roundnr, submergeAt
 
 
   # subs, submerge after casualties are resolved, if possible (replace with submerged sub, do not add to IPC loss)
-  if (submergeAttack){
+  if (result$submAttack){
     if (!any("dd" %in% result$unitsDefender)){
-      oolAttacker[oolAttacker == "sub"] <- "subm"
-      oolAttacker[oolAttacker == "ssub"] <- "ssubm"
+      result$unitsAttacker[result$unitsAttacker == "sub"] <- "subm"
+      result$unitsAttacker[result$unitsAttacker == "ssub"] <- "ssubm"
     }
   }
-  if (submergeDefend){
+  if (result$submDefend){
     if (!any("dd" %in% result$unitsAttacker)){
-      oolDefender[oolDefender == "sub"] <- "subm"
-      oolDefender[oolDefender == "ssub"] <- "ssubm"
+      result$unitsDefender[result$unitsDefender == "sub"] <- "subm"
+      result$unitsDefender[result$unitsDefender == "ssub"] <- "ssubm"
     }
   }
 
@@ -454,6 +457,8 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
   result$unitsAttacker <- oolAttacker
   result$unitsDefender <- oolDefender
   result$ret <- F
+  result$submAttack <- F
+  result$submDefend <- F
   terminated <- F
   while (!terminated){
 
@@ -467,7 +472,7 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
         write(paste("Defender: ", paste(result$unitsDefender, collapse=",")), stdout())
       }
 
-      result <- play_LHTR_battle_round(result$unitsAttacker, result$unitsDefender, round, F, F, verbose = verbose, unitlist = unitlist)
+      result <- play_LHTR_battle_round(result$unitsAttacker, result$unitsDefender, round, result$submAttack, result$submDefend, verbose = verbose, unitlist = unitlist)
       result$rounds <- round
       round <- round + 1
     }
@@ -525,6 +530,8 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
   result$attackerCost <- calculateCost(oolAttacker, result$unitsAttacker, unitlist)
   result$defenderCost <- calculateCost(oolDefender, result$unitsDefender, unitlist)
   result$ret <- NULL
+  result$submAttack <- NULL
+  result$submDefend <- NULL
   return(result)
 }
 
