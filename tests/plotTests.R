@@ -25,3 +25,34 @@ plotBattleSummary(sim)
 
 sim <- simulateBattles("SUBM 7 sub", "2 trn ac 2 ftr", iterations = 100, replications = 5)
 plotBattleSummary(sim)
+
+
+# Perform attack with usual simulation
+sim <- simulateBattles("7 inf 3 ftr", "7 inf 2 ftr", iterations = 1000, replications = 5)
+plotBattleSummary(sim)
+
+#repeat with empty first wave and compare results
+sim <- simulateTwoWaveBattles("RET", "7 inf 3 ftr", "7 inf", reinforcement = function(x){c(x, rep("ftr", 2))}, replications = 5, iterations = 1000)
+plot2WaveSummary(sim)
+
+#check effect of adding inital wave
+sim <- simulateTwoWaveBattles("7 inf", "7 inf 3 ftr", "7 inf", reinforcement = function(x){c(x, rep("ftr", 2))}, replications = 5, iterations = 1000)
+plot2WaveSummary(sim)
+
+
+#
+# Revisit when virtual units are resolved (AA guns)
+#
+
+# Perform attack with usual simulation
+#sim <- simulateBattles("7 inf 3 ftr", "5 inf AA 2 ftr", iterations = 1000, replications = 5)
+#plotBattleSummary(sim)
+
+#repeat with empty first wave and compare results
+#sim <- simulateTwoWaveBattles("RET", "7 inf 3 ftr", "5 inf AA", reinforcement = function(x){c(x, rep("ftr", 2))}, replications = 5, iterations = 1000)
+#plot2WaveSummary(sim)
+
+#check effect of adding inital wave
+#sim <- simulateTwoWaveBattles("5 inf", "7 inf 3 ftr", "5 inf AA", reinforcement = function(x){c(x, rep("ftr", 2))}, replications = 5, iterations = 100)
+#plot2WaveSummary(sim)
+

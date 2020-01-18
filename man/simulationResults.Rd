@@ -7,8 +7,8 @@
 For a simuation of n iterations, replicated m times this is:
 list with members:
 \describe{
- \item{attackerStart}{units for attacker at start of battle, formatted as oolAttacker}
- \item{defenderStart}{units for defender at start of battle, formatted as oolDefender}
+ \item{attackerStart}{units for attacker at start of battle, formatted as \code{\link[aaSimulator]{ool}}}
+ \item{defenderStart}{units for defender at start of battle, formatted as \code{\link[aaSimulator]{ool}}}
  \item{replicates}{list of length m, with member for each replicate, each a list of length n containing \code{\link[aaSimulator]{battleResults}}}
 }
 }

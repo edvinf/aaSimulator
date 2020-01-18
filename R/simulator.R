@@ -41,12 +41,28 @@ NULL
 #' For a simuation of n iterations, replicated m times this is:
 #' list with members:
 #' \describe{
-#'  \item{attackerStart}{units for attacker at start of battle, formatted as oolAttacker}
-#'  \item{defenderStart}{units for defender at start of battle, formatted as oolDefender}
+#'  \item{attackerStart}{units for attacker at start of battle, formatted as \code{\link[aaSimulator]{ool}}}
+#'  \item{defenderStart}{units for defender at start of battle, formatted as \code{\link[aaSimulator]{ool}}}
 #'  \item{replicates}{list of length m, with member for each replicate, each a list of length n containing \code{\link[aaSimulator]{battleResults}}}
 #' }
 #'
 #' @name simulationResults
+#'
+NULL
+
+#' Result from two-wave battle simulation
+#'
+#' For a simuation of n iterations, replicated m times this is:
+#' list with members:
+#' \describe{
+#'  \item{firstWaveStart}{units for first wave attacker at start of battle, formatted as formatted as \code{\link[aaSimulator]{ool}}}
+#'  \item{secondWaveStart}{units for second wave attacker at start of battle, formatted as formatted as \code{\link[aaSimulator]{ool}}}
+#'  \item{defenderStart}{units for defender at start of battle, formatted as formatted as \code{\link[aaSimulator]{ool}}}
+#'  \item{defenderReinforced}{units for defender at start of battle, with reinforcements added, formatted as \code{\link[aaSimulator]{ool}}}
+#'  \item{replicates}{list of length m, with member for each replicate, each a list of length n containing two members: 'firstWave' and 'secondWave', both formatted as \code{\link[aaSimulator]{battleResults}}}
+#' }
+#'
+#' @name twoWaveSimulationResults
 #'
 NULL
 
@@ -207,18 +223,6 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
   if (iterations < 1){
     stop("Must run at least one iteratation.")
   }
-  if ("RET" %in% oolDefender){
-    stop("Flag RET is not allowed in defender OOL.")
-  }
-  if (sum(oolAttacker=="RET")>1){
-    stop("Include RET only once in attacker OOL.")
-  }
-  if (sum(oolDefender=="SUBM")>1){
-    stop("Include SUBM only once in each OOL.")
-  }
-  if (sum(oolAttacker=="SUBM")>1){
-    stop("Include SUBM only once in each OOL.")
-  }
 
   results <- list()
   results$attackerStart <- oolAttacker
@@ -243,6 +247,89 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
   return(results)
 }
 
+#' Simulate two-wave Battles
+#' @description
+#' Simulate Axis and Allies two-wave Battles
+#' @details
+#' This function simulates two waves of attack against a defender,
+#' with possible reinforcement of defence between the waves.
+#' Reinforcements are specified by a function (argument 'reinforcement') that modifies the
+#' surviving units from the first wave before the second wave commences.
+#'
+#' The battle function 'FUN' implements the ruleset used.
+#' FUN must accept the arguments 'oolAttacker' and 'oolDefender' and a logical argument suppressChecks,
+#' it must return \code{\link[aaSimulator]{battleResults}}
+#'
+#' @param oolFirstAttacker character() vector of unit codes in preferred order of loss for first attack wave, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
+#' @param oolFirstAttacker character() vector of unit codes in preferred order of loss for second attack wave, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
+#' @param oolDefender character() vector of unit codes in preferred order of loss for defender, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
+#' @param FUN function for running one battle
+#' @param ... additional arguments passed to FUN
+#' @param iterations number of iterations to simulate for each replication
+#' @param replications number of replicates to run
+#' @param reinformcement function for reinforcing defender between waves, accepts and returns argument formatted as \code{\link[aaSimulator]{ool}}.
+#' @return \code{\link[aaSimulator]{twoWaveSimulationResults}}
+#' @examples
+#'  # simulate a two wave attack against 10 infantry,
+#'  # reinforced by 3 fighters added at the end of order of loss specification
+#'  # first wave of attack consists of 10 infantry
+#'  # second wave of attack consists of 10 infantry
+#'  result <- simulateTwoWaveBattles("10 inf", "10 inf", "10 inf",
+#'       reinforcement = function(x){c(x, rep("ftr", 3))})
+#' @export
+simulateTwoWaveBattles <- function(oolFirstAttacker, oolSecondAttacker, oolDefender, FUN=play_LHTR_battle, ..., iterations=2000, replications=3, reinforcement=function(x){x}){
+
+  warning("Not finished. Need to deal with virtual units in defender (AA guns BBx, etc.")
+
+  if (length(oolFirstAttacker)==1){
+    oolFirstAttacker <- expandPrefixedOOL(oolFirstAttacker)
+  }
+  if (length(oolSecondAttacker)==1){
+    oolSecondAttacker <- expandPrefixedOOL(oolSecondAttacker)
+  }
+  if (length(oolDefender)==1){
+    oolDefender <- expandPrefixedOOL(oolDefender)
+  }
+
+  if (replications < 1){
+    stop("Must run at least one replicate.")
+  }
+  if (iterations < 1){
+    stop("Must run at least one iteratation.")
+  }
+
+  output <- list()
+
+  results <- list()
+  results$firstWaveStart <- oolFirstAttacker
+  results$secondWaveStart <- oolSecondAttacker
+  results$defenderStart <- oolDefender
+  results$defenderReinforced <- reinforcement(oolDefender)
+  results$replicates <- list()
+
+  for (i in 1:replications){
+
+    firstresultFirstWave <- FUN(results$firstWaveStart, results$defenderStart, suppressChecks=F, ...)
+    firstresultSecondWave <- FUN(results$secondWaveStart, reinforcement(firstresultFirstWave$unitsDefender), suppressChecks=F, ...)
+
+    outcome <- list()
+    outcome[[1]] <- list()
+    outcome[[1]]$firstWave <- firstresultFirstWave
+    outcome[[1]]$secondWave <- firstresultSecondWave
+
+    for (j in 2:iterations){
+      lastresultFirstwave <- FUN(results$firstWaveStart, results$defenderStart, suppressChecks=T, ...)
+      lastresultSecondWave <- FUN(results$secondWaveStart, reinforcement(lastresultFirstwave$unitsDefender), suppressChecks=T, ...)
+      outcome[[j]] <- list()
+      outcome[[j]]$firstWave <- lastresultFirstwave
+      outcome[[j]]$secondWave <- lastresultSecondWave
+    }
+
+    results$replicates[[i]] <- outcome
+  }
+
+  return(results)
+}
 
 #' Battle statistics for simulation
 #'

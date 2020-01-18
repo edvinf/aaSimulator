@@ -126,3 +126,16 @@ expect_error(optimizeUnits(6, attacker= "2 inf", defender = "2 inf", units=c("in
 expect_error(optimizeUnits(6, units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), rank=c("overlap",1), verbose=F))
 expect_error(optimizeUnits(6, defender = "2 inf", units=c("inf", "art", "arm"), iterations=c(2,10), replications=c(1, 2), rank="overlap", verbose=F))
 
+#
+# Two-wave attack
+#
+result <- simulateTwoWaveBattles("20 inf", "10 inf", "10 inf", reinforcement = function(x){c(x, rep("ftr", 3))}, replications = 1, iterations = 10)
+expect_equal(length(result$defenderStart), 10)
+expect_equal(length(result$defenderReinforced), 13)
+expect_equal(sum(result$defenderReinforced=="ftr"), 3)
+expect_false(is.null(result$firstWaveStart))
+expect_false(is.null(result$secondWaveStart))
+expect_false(is.null(result$replicates[[1]][[1]]$firstWave))
+expect_false(is.null(result$replicates[[1]][[1]]$secondWave))
+
+
