@@ -279,7 +279,7 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
 #' @export
 simulateTwoWaveBattles <- function(oolFirstAttacker, oolSecondAttacker, oolDefender, FUN=play_LHTR_battle, ..., iterations=2000, replications=3, reinforcement=function(x){x}){
 
-  warning("Not finished. Need to deal with virtual units in defender (AA guns BBx, etc.")
+  warning("Not finished. Need to deal with virtual units in defender (AA guns BBx, etc.), add these to reinforcements even if present in oolDefender.")
 
   if (length(oolFirstAttacker)==1){
     oolFirstAttacker <- expandPrefixedOOL(oolFirstAttacker)
