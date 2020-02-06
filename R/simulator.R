@@ -29,6 +29,7 @@ NULL
 #'  \item{rounds}{integer() the number of rounds in the battler}
 #'  \item{attackerCost}{numeric() The cost of units lost for attacker}
 #'  \item{defenderCost}{numeric() The cost of units lost for defender}
+#'  \item{cleared}{logical() whether the territory / zone was cleared or not.}
 #' }
 #'
 #' @name battleResults
@@ -256,18 +257,23 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
 #' Reinforcements are specified by a function (argument 'reinforcement') that modifies the
 #' surviving units from the first wave before the second wave commences.
 #'
+#' Note that the defenders unit configuration is set up eactly as it was left after the first round of attack.
+#' For some virtual units that may cause the second wave to not be incorrectly modeled.
+#' Consider for instance a defender OOL set up with virtual units to reflect first hits on battle ships.
+#' These are not automatically restored before the second wave, but must be configured with the 'reinforcement' argument.
+#'
 #' The battle function 'FUN' implements the ruleset used.
 #' FUN must accept the arguments 'oolAttacker' and 'oolDefender' and a logical argument suppressChecks,
 #' it must return \code{\link[aaSimulator]{battleResults}}
 #'
 #' @param oolFirstAttacker character() vector of unit codes in preferred order of loss for first attack wave, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
-#' @param oolFirstAttacker character() vector of unit codes in preferred order of loss for second attack wave, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
+#' @param oolSecondAttacker character() vector of unit codes in preferred order of loss for second attack wave, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
 #' @param oolDefender character() vector of unit codes in preferred order of loss for defender, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}
 #' @param FUN function for running one battle
 #' @param ... additional arguments passed to FUN
 #' @param iterations number of iterations to simulate for each replication
 #' @param replications number of replicates to run
-#' @param reinformcement function for reinforcing defender between waves, accepts and returns argument formatted as \code{\link[aaSimulator]{ool}}.
+#' @param reinforcement function for reinforcing defender between waves, accepts and returns argument formatted as \code{\link[aaSimulator]{ool}}.
 #' @return \code{\link[aaSimulator]{twoWaveSimulationResults}}
 #' @examples
 #'  # simulate a two wave attack against 10 infantry,
@@ -278,8 +284,6 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
 #'       reinforcement = function(x){c(x, rep("ftr", 3))})
 #' @export
 simulateTwoWaveBattles <- function(oolFirstAttacker, oolSecondAttacker, oolDefender, FUN=play_LHTR_battle, ..., iterations=2000, replications=3, reinforcement=function(x){x}){
-
-  warning("Not finished. Need to deal with virtual units in defender (AA guns BBx, etc.), add these to reinforcements even if present in oolDefender.")
 
   if (length(oolFirstAttacker)==1){
     oolFirstAttacker <- expandPrefixedOOL(oolFirstAttacker)
@@ -374,15 +378,15 @@ calculateStats <- function(simulationResults){
 
 
   winProportion <- function(repl){
-    return(sum(unlist(lapply(repl, FUN = function(x){length(x[["unitsAttacker"]]) > 0 & length(x[["unitsDefender"]]) == 0}))) / length(repl))
+    return(sum(unlist(lapply(repl, FUN = function(x){x[["cleared"]]}))) / length(repl))
   }
 
   looseProportion <- function(repl){
-    return(sum(unlist(lapply(repl, FUN = function(x){length(x[["unitsDefender"]]) > 0}))) / length(repl))
+    return(sum(unlist(lapply(repl, FUN = function(x){!x[["cleared"]]}))) / length(repl))
   }
 
   drawProportion <- function(repl){
-    return(sum(unlist(lapply(repl, FUN = function(x){length(x[["unitsAttacker"]]) == 0 & length(x[["unitsDefender"]]) == 0}))) / length(repl))
+    return(sum(unlist(lapply(repl, FUN = function(x){length(x[["unitsAttacker"]]) == 0 & !x[["cleared"]]}))) / length(repl))
   }
 
   stats <- list()

@@ -520,13 +520,17 @@ play_LHTR_battle <- function(oolAttacker, oolDefender, retreat=NULL, verbose=F, 
     result$unitsDefender[result$unitsDefender == "ssubm"] <- "ssub"
   }
 
+  if (length(result$unitsDefender)){
+    result$cleared <- T
+  } else{
+    result$cleared <- F
+  }
+
   #add AA guns back in at end if included
   result$unitsDefender <- c(result$unitsDefender, oolDefender[oolDefender == "AA"])
 
   result$defenderLoss <- NULL
   result$attackerLoss <- NULL
-  result$unitsAttacker <- result$unitsAttacker[result$unitsAttacker %in% nonvirtualunits]
-  result$unitsDefender <- result$unitsDefender[result$unitsDefender %in% nonvirtualunits]
   result$attackerCost <- calculateCost(oolAttacker, result$unitsAttacker, unitlist)
   result$defenderCost <- calculateCost(oolDefender, result$unitsDefender, unitlist)
   result$ret <- NULL

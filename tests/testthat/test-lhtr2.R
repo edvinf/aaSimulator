@@ -15,7 +15,7 @@ expect_gte(s$defenderCost + s$attackerCost, 2)
 s<-play_LHTR_battle(c("BBomb", "inf"), c("inf", "AA"))
 expect_false(is.null(s$unitsAttacker))
 expect_false(is.null(s$unitsDefender))
-expect_false("AA" %in% s$unitsDefender)
+expect_true("AA" %in% s$unitsDefender)
 expect_gte(s$rounds, 1)
 
 expect_error(play_LHTR_battle(c("BBomb", "inf"), c("BBomb", "inf", "AA")))

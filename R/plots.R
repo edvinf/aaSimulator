@@ -215,6 +215,16 @@ extractTwoWaveSimulationResult <- function(twoWaveSimulationResults){
 
 }
 
+#' Plot summary of two-wave battle
+#' @description
+#'  Produces a panneled plot summarizing results of a two-wave battle simulation
+#' @param twoWaveSimulationResults, formatted as: \code{\link[aaSimulator]{twoWaveSimulationResults}}
+#' @examples
+#'  sim <- simulateTwoWaveBattles("7 inf", "7 inf 3 ftr", "7 inf",
+#'                                reinforcement = function(x){c(x, rep("ftr", 2))},
+#'                                replications = 5, iterations = 1000)
+#'  plot2WaveSummary(sim)
+#' @export
 plot2WaveSummary <- function(twoWaveSimulationResults){
   result <- extractTwoWaveSimulationResult(twoWaveSimulationResults)
 

@@ -11,5 +11,6 @@ a list with members
  \item{rounds}{integer() the number of rounds in the battler}
  \item{attackerCost}{numeric() The cost of units lost for attacker}
  \item{defenderCost}{numeric() The cost of units lost for defender}
+ \item{cleared}{logical() whether the territory / zone was cleared or not.}
 }
 }

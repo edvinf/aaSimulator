@@ -16,7 +16,9 @@ simulateTwoWaveBattles(
 )
 }
 \arguments{
-\item{oolFirstAttacker}{character() vector of unit codes in preferred order of loss for second attack wave, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}}
+\item{oolFirstAttacker}{character() vector of unit codes in preferred order of loss for first attack wave, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}}
+
+\item{oolSecondAttacker}{character() vector of unit codes in preferred order of loss for second attack wave, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}}
 
 \item{oolDefender}{character() vector of unit codes in preferred order of loss for defender, formatted as \code{\link[aaSimulator]{ool}} or \code{\link[aaSimulator]{prefixedOol}}}
 
@@ -28,7 +30,7 @@ simulateTwoWaveBattles(
 
 \item{replications}{number of replicates to run}
 
-\item{reinformcement}{function for reinforcing defender between waves, accepts and returns argument formatted as \code{\link[aaSimulator]{ool}}.}
+\item{reinforcement}{function for reinforcing defender between waves, accepts and returns argument formatted as \code{\link[aaSimulator]{ool}}.}
 }
 \value{
 \code{\link[aaSimulator]{twoWaveSimulationResults}}
@@ -41,6 +43,11 @@ This function simulates two waves of attack against a defender,
 with possible reinforcement of defence between the waves.
 Reinforcements are specified by a function (argument 'reinforcement') that modifies the
 surviving units from the first wave before the second wave commences.
+
+Note that the defenders unit configuration is set up eactly as it was left after the first round of attack.
+For some virtual units that may cause the second wave to not be incorrectly modeled.
+Consider for instance a defender OOL set up with virtual units to reflect first hits on battle ships.
+These are not automatically restored before the second wave, but must be configured with the 'reinforcement' argument.
 
 The battle function 'FUN' implements the ruleset used.
 FUN must accept the arguments 'oolAttacker' and 'oolDefender' and a logical argument suppressChecks,
