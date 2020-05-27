@@ -258,9 +258,12 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
 #' surviving units from the first wave before the second wave commences.
 #'
 #' Note that the defenders unit configuration is set up eactly as it was left after the first round of attack.
+#' Exactly what is left after the first round of attack is defined by the battle function provided in 'FUN'
 #' For some virtual units that may cause the second wave to not be incorrectly modeled.
 #' Consider for instance a defender OOL set up with virtual units to reflect first hits on battle ships.
 #' These are not automatically restored before the second wave, but must be configured with the 'reinforcement' argument.
+#'
+#' The 'reinforcement' argument may otherwise be used to model the reinforcement of allied units between the two waves of attack.
 #'
 #' The battle function 'FUN' implements the ruleset used.
 #' FUN must accept the arguments 'oolAttacker' and 'oolDefender' and a logical argument suppressChecks,
@@ -273,7 +276,7 @@ simulateBattles <- function(oolAttacker, oolDefender, FUN=play_LHTR_battle, ...,
 #' @param ... additional arguments passed to FUN
 #' @param iterations number of iterations to simulate for each replication
 #' @param replications number of replicates to run
-#' @param reinforcement function for reinforcing defender between waves, accepts and returns argument formatted as \code{\link[aaSimulator]{ool}}.
+#' @param reinforcement function for adjusting 'oolDefender' between waves, accepts and returns argument formatted as \code{\link[aaSimulator]{ool}}.
 #' @return \code{\link[aaSimulator]{twoWaveSimulationResults}}
 #' @examples
 #'  # simulate a two wave attack against 10 infantry,
