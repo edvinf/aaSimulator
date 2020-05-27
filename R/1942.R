@@ -53,6 +53,8 @@ attack1942 <- function(units, unitlist=aaSimulator::unitlist1942se){
   hits <- 0
 
   inf <- units[units == "inf"]
+  rest <- units[units != "inf"]
+
   nart <- sum(rest == "art")
 
   twos <- min(length(inf), nart)
@@ -175,12 +177,14 @@ play_1942se_battle_round <- function(oolAttacker, oolDefender, roundnr, submerge
       # Anti aircraft gun
       #
 
+
       if (dice > 0){
         hits <- roll(dice, 1)
         remove_casualties(hits, "attacker", c("ftr", "bmb"))
 
         if (verbose & ftrhit > 0){
           write(paste("Hit", dice, "air units. Casualties removed."), stdout())
+
         }
 
       }
@@ -218,6 +222,7 @@ play_1942se_battle_round <- function(oolAttacker, oolDefender, roundnr, submerge
       }
 
       cbombhit <- roll(cds, 3)
+
       offshorehits <- offshorehits + cbombhit
 
       if (verbose & cbombhit > 0){
@@ -249,6 +254,7 @@ play_1942se_battle_round <- function(oolAttacker, oolDefender, roundnr, submerge
 
   #
   # remaining submarines attack, remove casualties if surprise attack conditions met
+
   #
   if (verbose & length(oolAttacker[oolAttacker == "sub" | oolAttacker == "ssub"])>0){
     write(paste("Attacking submarines fire:,", sum(oolAttacker == "sub" | oolAttacker == "ssub"), "dice."), stdout())
@@ -319,16 +325,13 @@ play_1942se_battle_round <- function(oolAttacker, oolDefender, roundnr, submerge
     remove_casualties(airhitsdefender, "attacker")
   }
 
-  #remove sub casualties if not already removed
-  remove_casualties(subattackhits, "defender", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
-  remove_casualties(subdefendhits, "attacker", targetunits = unitlist$shortcut[unitlist$type == "Sea"])
-
   #remove ofshore bombardment casualties
   remove_casualties(offshorehits, "defender")
 
   #remove regular casualties
   remove_casualties(attackhits, "defender")
   remove_casualties(defendhits, "attacker")
+
 
   return(result)
 }
